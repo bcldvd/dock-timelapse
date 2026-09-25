@@ -29,8 +29,9 @@ Ask Claude:
 
 ## Requirements
 
-macOS and [uv](https://docs.astral.sh/uv/). ffmpeg comes bundled. The MCP server runs
-`dock-timelapse` 0.2.0 from PyPI in an environment pinned by `uv.lock`.
+macOS and [uv](https://docs.astral.sh/uv/). ffmpeg comes bundled. The MCP server starts from
+`scripts/mcp-server.sh`, which runs `dock-timelapse` 0.2.0 from PyPI in an environment pinned by
+`uv.lock` (`uv run --locked`).
 
 ## Privacy
 

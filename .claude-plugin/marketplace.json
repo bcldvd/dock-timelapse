@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "dock-timelapse",
+  "owner": { "name": "David Boclé", "url": "https://github.com/bcldvd" },
+  "description": "Timelapse videos of how your macOS Dock evolves.",
+  "plugins": [
+    {
+      "name": "dock-timelapse",
+      "source": "./",
+      "description": "Record your macOS Dock daily and render Apple-style timelapse videos (skill + MCP server).",
+      "version": "0.2.0",
+      "category": "productivity",
+      "tags": ["macos", "dock", "video", "timelapse"]
+    }
+  ]
+}

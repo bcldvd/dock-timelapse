@@ -1,0 +1,19 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.bcldvd/dock-timelapse",
+  "title": "Dock Timelapse",
+  "description": "Record how your macOS Dock evolves and render Apple-style timelapse videos of it.",
+  "repository": { "url": "https://github.com/bcldvd/dock-timelapse", "source": "github" },
+  "websiteUrl": "https://github.com/bcldvd/dock-timelapse",
+  "version": "0.2.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "dock-timelapse",
+      "version": "0.2.0",
+      "runtimeHint": "uvx",
+      "transport": { "type": "stdio" },
+      "packageArguments": [{ "type": "positional", "value": "mcp" }]
+    }
+  ]
+}

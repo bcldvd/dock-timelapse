@@ -1,0 +1,13 @@
+plugin/.claude-plugin/plugin.json
+  ai_agent 5-10,13-20
+plugin/README.md
+  ai_agent 1-45
+.claude-plugin/marketplace.json
+  ai_agent 4-7,13,16-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "8d954bb9fd1558ba2eb6f67fa14c3e193d5c79a1",
+  "prompts": {}
+}

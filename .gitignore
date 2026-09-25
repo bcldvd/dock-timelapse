@@ -6,3 +6,4 @@ __pycache__/
 /poc-data/
 .DS_Store
 demo-data/
+.env

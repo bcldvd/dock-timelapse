@@ -1,0 +1,9 @@
+plugin/.claude-plugin/plugin.json
+  ai_agent 20-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "b4c10c4fb47d3e6ea28141597400bd4e8408f629",
+  "prompts": {}
+}

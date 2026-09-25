@@ -17,5 +17,7 @@
     "video",
     "productivity",
     "mcp"
-  ]
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
 }

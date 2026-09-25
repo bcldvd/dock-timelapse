@@ -17,7 +17,7 @@ If `dock_*` / `render_*` MCP tools from the `dock-timelapse` server are availabl
 Otherwise run the CLI. Use `dock-timelapse` if it is on PATH, else prefix every command with:
 
 ```bash
-uvx dock-timelapse
+uvx dock-timelapse@0.2.0
 ```
 
 When you hand the user a command to run later, give it in the same full form you used.

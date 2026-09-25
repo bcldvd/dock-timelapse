@@ -2,7 +2,7 @@
   "name": "dock-timelapse",
   "displayName": "Dock Timelapse",
   "version": "0.2.0",
-  "description": "Record how your macOS Dock evolves and render Apple-style timelapse videos of the apps you adopt, drop and replace.",
+  "description": "Record how your macOS Dock evolves and render Apple-style timelapse videos of the apps you add and replace.",
   "author": { "name": "David Boclé", "url": "https://github.com/bcldvd" },
   "homepage": "https://github.com/bcldvd/dock-timelapse",
   "repository": "https://github.com/bcldvd/dock-timelapse",

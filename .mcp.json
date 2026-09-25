@@ -2,7 +2,7 @@
   "mcpServers": {
     "dock-timelapse": {
       "command": "uvx",
-      "args": ["dock-timelapse", "mcp"]
+      "args": ["dock-timelapse==0.2.0", "mcp"]
     }
   }
 }

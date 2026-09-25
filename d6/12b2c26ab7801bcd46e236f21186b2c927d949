@@ -1,0 +1,23 @@
+plugin/README.md
+  ai_agent 32-34
+plugin/scripts/mcp-server.sh
+  s_f791e488d16361::t_d95eed762c2752 1-6
+plugin/.mcp.json
+  s_f791e488d16361::t_d95eed762c2752 4-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "d612b2c26ab7801bcd46e236f21186b2c927d949",
+  "prompts": {},
+  "sessions": {
+    "s_f791e488d16361": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9035e992-bb4f-474f-ab99-c3442e8aec92",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "David Boclé <bcldvd@users.noreply.github.com>"
+    }
+  }
+}

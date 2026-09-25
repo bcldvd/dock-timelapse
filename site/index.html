@@ -292,18 +292,18 @@
   "mcpServers": {
     "dock-timelapse": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/bcldvd/dock-timelapse", "dock-timelapse", "mcp"]
+      "args": ["dock-timelapse", "mcp"]
     }
   }
 }</pre><button class="copy">Copy</button></div>
         <p>For Codex, in <code>~/.codex/config.toml</code>:</p>
         <div class="code"><pre>[mcp_servers.dock-timelapse]
 command = "uvx"
-args = ["--from", "git+https://github.com/bcldvd/dock-timelapse", "dock-timelapse", "mcp"]</pre><button class="copy">Copy</button></div>
+args = ["dock-timelapse", "mcp"]</pre><button class="copy">Copy</button></div>
       </div>
 
       <div class="panel" role="tabpanel" id="p-cli" aria-labelledby="t-cli" hidden>
-        <div class="code"><pre>uv tool install git+https://github.com/bcldvd/dock-timelapse
+        <div class="code"><pre>uv tool install dock-timelapse
 
 dock-timelapse install   <span class="c"># start recording</span>
 dock-timelapse preview   <span class="c"># your video today, with an invented past</span>

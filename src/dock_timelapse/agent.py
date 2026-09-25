@@ -11,7 +11,7 @@ from pathlib import Path
 
 LABEL = "io.github.bcldvd.dock-timelapse"
 LEGACY_LABELS = ["com.bcldvd.dock-timelapse"]
-PACKAGE_SPEC = os.environ.get("DOCK_TIMELAPSE_SPEC", "git+https://github.com/bcldvd/dock-timelapse")
+PACKAGE_SPEC = os.environ.get("DOCK_TIMELAPSE_SPEC", "dock-timelapse")
 EPHEMERAL_MARKERS = ("/.cache/uv/", "/uv/archive-", "/Caches/uv/")
 
 

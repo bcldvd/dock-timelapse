@@ -38,7 +38,7 @@ Requirements: macOS and [uv](https://docs.astral.sh/uv/). ffmpeg comes bundled.
 ### Command line
 
 ```bash
-uv tool install git+https://github.com/bcldvd/dock-timelapse
+uv tool install dock-timelapse
 
 dock-timelapse install        # start recording (hourly agent, one snapshot per day of change)
 dock-timelapse preview        # see your video now, with an invented past
@@ -70,7 +70,7 @@ npx skills add bcldvd/dock-timelapse -y
   "mcpServers": {
     "dock-timelapse": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/bcldvd/dock-timelapse", "dock-timelapse", "mcp"]
+      "args": ["dock-timelapse", "mcp"]
     }
   }
 }
@@ -81,11 +81,11 @@ Codex (`~/.codex/config.toml`):
 ```toml
 [mcp_servers.dock-timelapse]
 command = "uvx"
-args = ["--from", "git+https://github.com/bcldvd/dock-timelapse", "dock-timelapse", "mcp"]
+args = ["dock-timelapse", "mcp"]
 ```
 
 Tools: `dock_status`, `current_dock`, `dock_history`, `install_recording`, `uninstall_recording`,
-`capture_now`, `render_timelapse`, `render_preview`.
+`capture_now`, `render_timelapse`, `render_preview`, `render_frame`.
 
 ## Usage
 

@@ -2,7 +2,7 @@
   "mcpServers": {
     "dock-timelapse": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/bcldvd/dock-timelapse", "dock-timelapse", "mcp"]
+      "args": ["dock-timelapse", "mcp"]
     }
   }
 }

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "dock-timelapse": {
+      "command": "uv",
+      "args": ["run", "--locked", "--project", "${CLAUDE_PLUGIN_ROOT}", "dock-timelapse", "mcp"]
+    }
+  }
+}

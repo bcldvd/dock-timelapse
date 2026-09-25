@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "dock-timelapse",
-      "source": "./",
+      "source": "./plugin",
       "description": "Record your macOS Dock daily and render Apple-style timelapse videos (skill + MCP server).",
       "version": "0.2.0",
       "category": "productivity",

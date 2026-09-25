@@ -14,13 +14,12 @@ including System Settings) on each day they change, and re-renders the history a
 over the blurred wallpaper, springs for arrivals/departures, labels next to changed icons, a day counter.
 
 If `dock_*` / `render_*` MCP tools from the `dock-timelapse` server are available, prefer them.
-Otherwise run the CLI. Use `dock-timelapse` if it is on PATH, else prefix every command with:
+Otherwise run the CLI, `dock-timelapse`. If it is not on PATH yet, install it once (it needs
+[uv](https://docs.astral.sh/uv/)):
 
 ```bash
-uvx dock-timelapse@0.2.0
+uv tool install dock-timelapse==0.2.0
 ```
-
-When you hand the user a command to run later, give it in the same full form you used.
 
 ## Workflow
 

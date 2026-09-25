@@ -1,0 +1,10 @@
+# Runtime environment for the Claude Code plugin: dock-timelapse at an exact version,
+# with every dependency pinned by hash in uv.lock.
+[project]
+name = "dock-timelapse-plugin"
+version = "0.2.0"
+requires-python = ">=3.12"
+dependencies = ["dock-timelapse==0.2.0"]
+
+[tool.uv]
+package = false

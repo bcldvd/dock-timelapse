@@ -2,7 +2,6 @@
 name: dock-timelapse
 description: Record how the user's macOS Dock evolves over time and render Apple-style timelapse videos (landscape and portrait) of apps being added, removed and replaced. Use when the user asks to track, record, visualize or make a video/timelapse of their Mac Dock, see which apps they adopted or dropped, or check how their Dock changed since some date.
 license: MIT
-compatibility: macOS with uv (https://docs.astral.sh/uv/). ffmpeg comes bundled.
 metadata:
   repository: https://github.com/bcldvd/dock-timelapse
 ---
@@ -11,7 +10,8 @@ metadata:
 
 `dock-timelapse` records the Dock's pinned apps (read from the Dock's own preferences, up to and
 including System Settings) on each day they change, and re-renders the history as videos: a glass Dock
-over the blurred wallpaper, springs for arrivals/departures, labels next to changed icons, a day counter.
+over the blurred wallpaper, springs for arrivals/departures, labels next to changed icons, a day counter. It runs on macOS with
+[uv](https://docs.astral.sh/uv/); ffmpeg comes bundled.
 
 If `dock_*` / `render_*` MCP tools from the `dock-timelapse` server are available, prefer them.
 Otherwise run the CLI, `dock-timelapse`. If it is not on PATH yet, install it once (it needs

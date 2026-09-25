@@ -263,7 +263,7 @@ class Timeline:
             length=sum(tile.slot for tile in tiles),
             day=day, date=date,
             labels=self._labels(i, phase, p, tiles),
-            progress=(day - self.scenes[0].day) / self.span_days,
+            progress=(day - self.scenes[0].day) / self.span_days if len(self.scenes) > 1 else 1.0,
             outro=outro, title=title,
             wallpaper=sc.wallpaper, wallpaper_from=wp_from, wallpaper_mix=mix,
         )

@@ -1,0 +1,527 @@
+[
+ {
+  "date": "2025-12-26",
+  "day": 1,
+  "apps": [
+   {
+    "key": "com.apple.Safari",
+    "label": "Safari",
+    "icon": "icons/com-apple-Safari.png"
+   },
+   {
+    "key": "com.apple.Terminal",
+    "label": "Terminal",
+    "icon": "icons/com-apple-Terminal.png"
+   },
+   {
+    "key": "com.apple.mail",
+    "label": "Mail",
+    "icon": "icons/com-apple-mail.png"
+   },
+   {
+    "key": "com.apple.iCal",
+    "label": "Calendar",
+    "icon": "icons/com-apple-iCal.png"
+   },
+   {
+    "key": "com.linear",
+    "label": "Linear",
+    "icon": "icons/com-linear.png"
+   },
+   {
+    "key": "com.apple.iWork.Keynote",
+    "label": "Keynote",
+    "icon": "icons/com-apple-iWork-Keynote.png"
+   },
+   {
+    "key": "com.apple.podcasts",
+    "label": "Podcasts",
+    "icon": "icons/com-apple-podcasts.png"
+   },
+   {
+    "key": "com.apple.Music",
+    "label": "Music",
+    "icon": "icons/com-apple-Music.png"
+   },
+   {
+    "key": "com.apple.AppStore",
+    "label": "App Store",
+    "icon": "icons/com-apple-AppStore.png"
+   },
+   {
+    "key": "com.apple.systempreferences",
+    "label": "System Settings",
+    "icon": "icons/com-apple-systempreferences.png"
+   }
+  ],
+  "changes": []
+ },
+ {
+  "date": "2026-02-26",
+  "day": 63,
+  "apps": [
+   {
+    "key": "com.apple.Safari",
+    "label": "Safari",
+    "icon": "icons/com-apple-Safari.png"
+   },
+   {
+    "key": "com.apple.Terminal",
+    "label": "Terminal",
+    "icon": "icons/com-apple-Terminal.png"
+   },
+   {
+    "key": "com.apple.mail",
+    "label": "Mail",
+    "icon": "icons/com-apple-mail.png"
+   },
+   {
+    "key": "com.apple.iCal",
+    "label": "Calendar",
+    "icon": "icons/com-apple-iCal.png"
+   },
+   {
+    "key": "com.linear",
+    "label": "Linear",
+    "icon": "icons/com-linear.png"
+   },
+   {
+    "key": "com.apple.iWork.Keynote",
+    "label": "Keynote",
+    "icon": "icons/com-apple-iWork-Keynote.png"
+   },
+   {
+    "key": "com.todesktop.230313mzl4w4u92",
+    "label": "Cursor",
+    "icon": "icons/com-todesktop-230313mzl4w4u92.png"
+   },
+   {
+    "key": "com.apple.podcasts",
+    "label": "Podcasts",
+    "icon": "icons/com-apple-podcasts.png"
+   },
+   {
+    "key": "com.apple.Music",
+    "label": "Music",
+    "icon": "icons/com-apple-Music.png"
+   },
+   {
+    "key": "com.apple.AppStore",
+    "label": "App Store",
+    "icon": "icons/com-apple-AppStore.png"
+   },
+   {
+    "key": "com.apple.systempreferences",
+    "label": "System Settings",
+    "icon": "icons/com-apple-systempreferences.png"
+   }
+  ],
+  "changes": [
+   {
+    "kind": "added",
+    "label": "Cursor",
+    "old": null
+   }
+  ]
+ },
+ {
+  "date": "2026-04-26",
+  "day": 122,
+  "apps": [
+   {
+    "key": "com.apple.Safari",
+    "label": "Safari",
+    "icon": "icons/com-apple-Safari.png"
+   },
+   {
+    "key": "com.apple.Terminal",
+    "label": "Terminal",
+    "icon": "icons/com-apple-Terminal.png"
+   },
+   {
+    "key": "com.apple.mail",
+    "label": "Mail",
+    "icon": "icons/com-apple-mail.png"
+   },
+   {
+    "key": "com.apple.iCal",
+    "label": "Calendar",
+    "icon": "icons/com-apple-iCal.png"
+   },
+   {
+    "key": "com.linear",
+    "label": "Linear",
+    "icon": "icons/com-linear.png"
+   },
+   {
+    "key": "com.apple.iWork.Keynote",
+    "label": "Keynote",
+    "icon": "icons/com-apple-iWork-Keynote.png"
+   },
+   {
+    "key": "com.todesktop.230313mzl4w4u92",
+    "label": "Cursor",
+    "icon": "icons/com-todesktop-230313mzl4w4u92.png"
+   },
+   {
+    "key": "com.openai.chat",
+    "label": "ChatGPT",
+    "icon": "icons/com-openai-chat.png"
+   },
+   {
+    "key": "com.apple.Music",
+    "label": "Music",
+    "icon": "icons/com-apple-Music.png"
+   },
+   {
+    "key": "com.apple.AppStore",
+    "label": "App Store",
+    "icon": "icons/com-apple-AppStore.png"
+   },
+   {
+    "key": "com.apple.systempreferences",
+    "label": "System Settings",
+    "icon": "icons/com-apple-systempreferences.png"
+   }
+  ],
+  "changes": [
+   {
+    "kind": "replaced",
+    "label": "ChatGPT",
+    "old": "Podcasts"
+   }
+  ]
+ },
+ {
+  "date": "2026-05-31",
+  "day": 157,
+  "apps": [
+   {
+    "key": "com.apple.Safari",
+    "label": "Safari",
+    "icon": "icons/com-apple-Safari.png"
+   },
+   {
+    "key": "com.apple.Terminal",
+    "label": "Terminal",
+    "icon": "icons/com-apple-Terminal.png"
+   },
+   {
+    "key": "com.apple.mail",
+    "label": "Mail",
+    "icon": "icons/com-apple-mail.png"
+   },
+   {
+    "key": "com.apple.iCal",
+    "label": "Calendar",
+    "icon": "icons/com-apple-iCal.png"
+   },
+   {
+    "key": "com.apple.TextEdit",
+    "label": "TextEdit",
+    "icon": "icons/com-apple-TextEdit.png"
+   },
+   {
+    "key": "com.linear",
+    "label": "Linear",
+    "icon": "icons/com-linear.png"
+   },
+   {
+    "key": "com.apple.iWork.Keynote",
+    "label": "Keynote",
+    "icon": "icons/com-apple-iWork-Keynote.png"
+   },
+   {
+    "key": "com.todesktop.230313mzl4w4u92",
+    "label": "Cursor",
+    "icon": "icons/com-todesktop-230313mzl4w4u92.png"
+   },
+   {
+    "key": "com.openai.chat",
+    "label": "ChatGPT",
+    "icon": "icons/com-openai-chat.png"
+   },
+   {
+    "key": "com.apple.Music",
+    "label": "Music",
+    "icon": "icons/com-apple-Music.png"
+   },
+   {
+    "key": "com.apple.AppStore",
+    "label": "App Store",
+    "icon": "icons/com-apple-AppStore.png"
+   },
+   {
+    "key": "com.apple.systempreferences",
+    "label": "System Settings",
+    "icon": "icons/com-apple-systempreferences.png"
+   }
+  ],
+  "changes": [
+   {
+    "kind": "added",
+    "label": "TextEdit",
+    "old": null
+   }
+  ]
+ },
+ {
+  "date": "2026-07-21",
+  "day": 208,
+  "apps": [
+   {
+    "key": "com.apple.Safari",
+    "label": "Safari",
+    "icon": "icons/com-apple-Safari.png"
+   },
+   {
+    "key": "com.apple.MobileSMS",
+    "label": "Messages",
+    "icon": "icons/com-apple-MobileSMS.png"
+   },
+   {
+    "key": "com.apple.mail",
+    "label": "Mail",
+    "icon": "icons/com-apple-mail.png"
+   },
+   {
+    "key": "com.apple.iCal",
+    "label": "Calendar",
+    "icon": "icons/com-apple-iCal.png"
+   },
+   {
+    "key": "com.apple.TextEdit",
+    "label": "TextEdit",
+    "icon": "icons/com-apple-TextEdit.png"
+   },
+   {
+    "key": "com.linear",
+    "label": "Linear",
+    "icon": "icons/com-linear.png"
+   },
+   {
+    "key": "com.apple.iWork.Keynote",
+    "label": "Keynote",
+    "icon": "icons/com-apple-iWork-Keynote.png"
+   },
+   {
+    "key": "com.todesktop.230313mzl4w4u92",
+    "label": "Cursor",
+    "icon": "icons/com-todesktop-230313mzl4w4u92.png"
+   },
+   {
+    "key": "com.openai.chat",
+    "label": "ChatGPT",
+    "icon": "icons/com-openai-chat.png"
+   },
+   {
+    "key": "com.apple.Music",
+    "label": "Music",
+    "icon": "icons/com-apple-Music.png"
+   },
+   {
+    "key": "com.apple.Photos",
+    "label": "Photos",
+    "icon": "icons/com-apple-Photos.png"
+   },
+   {
+    "key": "com.apple.AppStore",
+    "label": "App Store",
+    "icon": "icons/com-apple-AppStore.png"
+   },
+   {
+    "key": "com.apple.systempreferences",
+    "label": "System Settings",
+    "icon": "icons/com-apple-systempreferences.png"
+   }
+  ],
+  "changes": [
+   {
+    "kind": "replaced",
+    "label": "Messages",
+    "old": "Terminal"
+   },
+   {
+    "kind": "added",
+    "label": "Photos",
+    "old": null
+   }
+  ]
+ },
+ {
+  "date": "2026-08-19",
+  "day": 237,
+  "apps": [
+   {
+    "key": "com.apple.Safari",
+    "label": "Safari",
+    "icon": "icons/com-apple-Safari.png"
+   },
+   {
+    "key": "com.apple.MobileSMS",
+    "label": "Messages",
+    "icon": "icons/com-apple-MobileSMS.png"
+   },
+   {
+    "key": "com.apple.mail",
+    "label": "Mail",
+    "icon": "icons/com-apple-mail.png"
+   },
+   {
+    "key": "com.apple.iCal",
+    "label": "Calendar",
+    "icon": "icons/com-apple-iCal.png"
+   },
+   {
+    "key": "com.apple.TextEdit",
+    "label": "TextEdit",
+    "icon": "icons/com-apple-TextEdit.png"
+   },
+   {
+    "key": "com.linear",
+    "label": "Linear",
+    "icon": "icons/com-linear.png"
+   },
+   {
+    "key": "com.apple.iWork.Keynote",
+    "label": "Keynote",
+    "icon": "icons/com-apple-iWork-Keynote.png"
+   },
+   {
+    "key": "com.todesktop.230313mzl4w4u92",
+    "label": "Cursor",
+    "icon": "icons/com-todesktop-230313mzl4w4u92.png"
+   },
+   {
+    "key": "com.openai.chat",
+    "label": "ChatGPT",
+    "icon": "icons/com-openai-chat.png"
+   },
+   {
+    "key": "com.anthropic.claudefordesktop",
+    "label": "Claude",
+    "icon": "icons/com-anthropic-claudefordesktop.png"
+   },
+   {
+    "key": "com.apple.Music",
+    "label": "Music",
+    "icon": "icons/com-apple-Music.png"
+   },
+   {
+    "key": "com.apple.Photos",
+    "label": "Photos",
+    "icon": "icons/com-apple-Photos.png"
+   },
+   {
+    "key": "com.apple.AppStore",
+    "label": "App Store",
+    "icon": "icons/com-apple-AppStore.png"
+   },
+   {
+    "key": "com.apple.systempreferences",
+    "label": "System Settings",
+    "icon": "icons/com-apple-systempreferences.png"
+   }
+  ],
+  "changes": [
+   {
+    "kind": "added",
+    "label": "Claude",
+    "old": null
+   }
+  ]
+ },
+ {
+  "date": "2026-09-25",
+  "day": 274,
+  "apps": [
+   {
+    "key": "com.apple.Safari",
+    "label": "Safari",
+    "icon": "icons/com-apple-Safari.png"
+   },
+   {
+    "key": "com.apple.MobileSMS",
+    "label": "Messages",
+    "icon": "icons/com-apple-MobileSMS.png"
+   },
+   {
+    "key": "com.apple.mail",
+    "label": "Mail",
+    "icon": "icons/com-apple-mail.png"
+   },
+   {
+    "key": "com.apple.iCal",
+    "label": "Calendar",
+    "icon": "icons/com-apple-iCal.png"
+   },
+   {
+    "key": "com.tinyspeck.slackmacgap",
+    "label": "Slack",
+    "icon": "icons/com-tinyspeck-slackmacgap.png"
+   },
+   {
+    "key": "notion.id",
+    "label": "Notion",
+    "icon": "icons/notion-id.png"
+   },
+   {
+    "key": "com.linear",
+    "label": "Linear",
+    "icon": "icons/com-linear.png"
+   },
+   {
+    "key": "com.apple.iWork.Keynote",
+    "label": "Keynote",
+    "icon": "icons/com-apple-iWork-Keynote.png"
+   },
+   {
+    "key": "com.todesktop.230313mzl4w4u92",
+    "label": "Cursor",
+    "icon": "icons/com-todesktop-230313mzl4w4u92.png"
+   },
+   {
+    "key": "com.openai.chat",
+    "label": "ChatGPT",
+    "icon": "icons/com-openai-chat.png"
+   },
+   {
+    "key": "com.anthropic.claudefordesktop",
+    "label": "Claude",
+    "icon": "icons/com-anthropic-claudefordesktop.png"
+   },
+   {
+    "key": "com.apple.Music",
+    "label": "Music",
+    "icon": "icons/com-apple-Music.png"
+   },
+   {
+    "key": "com.apple.Photos",
+    "label": "Photos",
+    "icon": "icons/com-apple-Photos.png"
+   },
+   {
+    "key": "com.apple.AppStore",
+    "label": "App Store",
+    "icon": "icons/com-apple-AppStore.png"
+   },
+   {
+    "key": "com.apple.systempreferences",
+    "label": "System Settings",
+    "icon": "icons/com-apple-systempreferences.png"
+   }
+  ],
+  "changes": [
+   {
+    "kind": "replaced",
+    "label": "Slack",
+    "old": "TextEdit"
+   },
+   {
+    "kind": "added",
+    "label": "Notion",
+    "old": null
+   }
+  ]
+ }
+]

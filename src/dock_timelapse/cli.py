@@ -15,20 +15,44 @@ DEFAULT_DATA = Path(os.environ.get("DOCK_TIMELAPSE_DATA", Path.home() / "Library
 DEFAULT_OUT = Path.home() / "Movies/Dock Timelapse"
 
 
+def _positive_int(v: str) -> int:
+    n = int(v)
+    if n <= 0:
+        raise argparse.ArgumentTypeError("fps must be a positive number, e.g. 30 or 60")
+    return n
+
+
+def _time(v: str) -> float:
+    t = float(v)
+    if t < 0:
+        raise argparse.ArgumentTypeError("times start at 0 (seconds from the start of the video)")
+    return t
+
+
 def _render_args(p: argparse.ArgumentParser, still: bool = False) -> None:
     p.add_argument("--format", choices=[*FORMATS, "both"], default="both")
     p.add_argument("--background", choices=["wallpaper", "desktop", "white"], default="wallpaper")
     p.add_argument("--out", type=Path, default=DEFAULT_OUT, help=f"output folder (default: {DEFAULT_OUT})")
     if still:
-        p.add_argument("--t", type=float, nargs="+", default=[3.0], help="times in seconds")
+        p.add_argument("--t", type=_time, nargs="+", default=[3.0], help="times in seconds")
     else:
-        p.add_argument("--fps", type=int, default=60)
+        p.add_argument("--fps", type=_positive_int, default=60)
 
 
 def main(argv: list[str] | None = None) -> None:
-    ap = argparse.ArgumentParser(prog="dock-timelapse", description="Timelapse videos of how your macOS Dock evolves.")
-    ap.add_argument("--data", type=Path, default=DEFAULT_DATA, help=f"data dir (default: {DEFAULT_DATA})")
-    sub = ap.add_subparsers(dest="cmd", required=True)
+    fmt_cls = argparse.ArgumentDefaultsHelpFormatter
+    ap = argparse.ArgumentParser(prog="dock-timelapse", formatter_class=fmt_cls,
+                                 description="Record your macOS Dock over time and render timelapse videos of it.")
+    ap.add_argument("--data", type=Path, default=DEFAULT_DATA, help="data dir")
+    common = argparse.ArgumentParser(add_help=False)  # lets --data also follow the subcommand
+    common.add_argument("--data", type=Path, default=argparse.SUPPRESS, help="data dir")
+    sub = ap.add_subparsers(dest="cmd", required=True, metavar="command")
+    _add = sub.add_parser
+
+    def add_parser(name, **kw):
+        return _add(name, parents=[common], formatter_class=fmt_cls, **kw)
+
+    sub.add_parser = add_parser
     p = sub.add_parser("install", help="start recording: hourly background agent (launchd)")
     p.add_argument("--screenshots", action=argparse.BooleanOptionalAction, default=None,
                    help="also keep a cropped Dock screenshot per change (needs Screen Recording permission)")
@@ -42,7 +66,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--demo", action="store_true", help="use a generic demo Dock instead of yours")
     _render_args(sub.add_parser("render", help="render the timelapse videos from your recorded history"))
     _render_args(sub.add_parser("still", help="render single PNG frames"), still=True)
-    sub.add_parser("poc", help="(dev) write an invented history into --data")
+    sub.add_parser("poc")  # dev: write an invented history into --data
     sub.add_parser("mcp", help="run the MCP server (stdio) for AI agents")
     args = ap.parse_args(argv)
 
@@ -57,11 +81,12 @@ def main(argv: list[str] | None = None) -> None:
 
         cfg = config.save(args.data, **({} if args.screenshots is None else {"screenshots": args.screenshots}))
         path, cmd = agent.install(args.data, DEFAULT_DATA)
+        py = agent.python_for(cmd[0])
         print(f"Recording started ({agent.LABEL}). Runs hourly; one snapshot per day the Dock changes.")
         print(f"  agent: {path}\n  data:  {args.data}\n  cmd:   {' '.join(cmd)}")
         if cfg["screenshots"]:
             print("  screenshots: on — grant Screen Recording to the Python running the agent:\n"
-                  f"    {Path(sys.executable).resolve()}\n"
+                  f"    {py}\n"
                   "    System Settings → Privacy & Security → Screen & System Audio Recording")
         return
 
@@ -87,10 +112,11 @@ def main(argv: list[str] | None = None) -> None:
         from dock_timelapse import agent
         from dock_timelapse.store import Store
 
-        print(f"agent: {'installed' if agent.installed() else 'not installed (run: dock-timelapse install)'}")
+        rec = agent.installed(args.data, DEFAULT_DATA)
+        print(f"recording: {'on' if rec else 'off (start it with: dock-timelapse install)'}")
         print(f"data:  {args.data}")
-        for s in Store(args.data).snapshots():
-            ch = ", ".join(c.describe() for c in s.changes) if len(s.changes) < 8 else f"{len(s.changes)} apps"
+        for k, s in enumerate(Store(args.data).snapshots()):
+            ch = "first snapshot" if k == 0 else ", ".join(c.describe() for c in s.changes)
             print(f"{s.date}  {len(s.apps):2d} apps  shot={'yes' if s.screenshot else '-'}  {ch}")
         return
 
@@ -125,6 +151,9 @@ def main(argv: list[str] | None = None) -> None:
     else:
         from dock_timelapse.video import render_still
 
+        if not (args.data / "snapshots.json").exists():
+            sys.exit("No history yet. Start recording with `dock-timelapse install`, "
+                     "or try `dock-timelapse preview` to see an invented past.")
         for fmt in fmts:
             for t in args.t:
                 print(render_still(args.data, fmt, t, args.out / f"still-{fmt.name}-{args.background}-{t:05.1f}.png",

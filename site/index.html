@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dock Timelapse</title>
+<meta name="description" content="Dock Timelapse records the apps you pin to your Mac's Dock and turns months of changes into an Apple-style timelapse video. Works from the terminal, Claude Code, Codex and any MCP client.">
+<meta property="og:title" content="Dock Timelapse">
+<meta property="og:description" content="Watch your Mac's Dock evolve: a timelapse of the apps you adopt, swap and keep.">
+<meta property="og:image" content="https://bcldvd.github.io/dock-timelapse/media/poster-landscape.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="icons/com-apple-systempreferences.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --indigo: #1b1f4a;
+    --violet: #6c4fd8;
+    --coral: #f07a5a;
+    --teal: #3fb7c9;
+    --page: #f3f4f8;
+    --ink: #16182c;
+    --ink-2: #565a73;
+    --line: #dfe1ea;
+    --card: #ffffff;
+    --code: #16182c;
+    --code-ink: #e8e9f4;
+    --green: #2fbf5b;
+    --red: #f0544a;
+    --radius-lg: 28px;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page: #0f1024; --ink: #eef0fa; --ink-2: #a3a7c4; --line: #272a48; --card: #17193a; --code: #0a0b1c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page: #0f1024; --ink: #eef0fa; --ink-2: #a3a7c4; --line: #272a48; --card: #17193a; --code: #0a0b1c;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 17px/1.55 var(--font);
+         -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; border-radius: 8px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- hero: a desktop with a living Dock ---------- */
+  .hero { position: relative; min-height: min(100svh, 1000px); color: #fff; overflow: hidden;
+          background: var(--indigo) url(media/wallpaper.jpg) center / cover no-repeat;
+          display: grid; grid-template-rows: auto 1fr auto; grid-template-columns: minmax(0, 1fr); }
+  .hero::before { content: ""; position: absolute; inset: 0;
+                  background: linear-gradient(180deg, rgba(10,12,34,.55) 0%, rgba(10,12,34,.1) 55%, rgba(10,12,34,.25) 100%); }
+  .hero > * { position: relative; }
+  .menubar { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 20px;
+             background: rgba(20,22,50,.28); backdrop-filter: blur(24px) saturate(1.4);
+             -webkit-backdrop-filter: blur(24px) saturate(1.4); font-size: 14px; font-weight: 600; }
+  .menubar nav { display: flex; gap: 22px; font-weight: 500; }
+  .menubar nav a { text-decoration: none; opacity: .9; }
+  .menubar nav a:hover { opacity: 1; }
+  .hero-copy { padding: clamp(48px, 10vh, 120px) 24px 24px; max-width: 1120px; width: 100%; margin: 0 auto; }
+  .hero h1 { font-size: clamp(44px, 8.4vw, 116px); line-height: .95; letter-spacing: -0.032em; font-weight: 800;
+             margin: 0 0 22px; max-width: 11ch; }
+  .hero p.lede { font-size: clamp(18px, 2vw, 22px); line-height: 1.45; max-width: 36ch; margin: 0 0 32px;
+                 color: rgba(255,255,255,.86); }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 22px; border-radius: 999px;
+         font: 600 16px var(--font); text-decoration: none; border: 0; cursor: pointer; }
+  .btn-primary { background: #fff; color: var(--indigo); }
+  .btn-glass { background: rgba(255,255,255,.14); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.3);
+               backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .btn:hover { filter: brightness(1.06); }
+
+  .stage { min-width: 0; width: 100%; padding: 0 16px 28px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .readout { display: flex; align-items: baseline; gap: 14px; min-height: 36px; font-variant-numeric: tabular-nums; }
+  .readout .date { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+  .readout .day { font-size: 17px; color: rgba(255,255,255,.75); }
+  .pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 40px; max-width: 100%; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px 0 10px; border-radius: 999px;
+          background: rgba(16,18,40,.42); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22);
+          backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); font-size: 15px; font-weight: 600;
+          animation: pill-in .5s cubic-bezier(.2,.9,.3,1.2) both; }
+  .pill .sign { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-weight: 800;
+                font-size: 15px; line-height: 1; color: #fff; }
+  .pill .sign.add { background: var(--green); } .pill .sign.swap { background: var(--violet); }
+  .pill .sign.out { background: var(--red); }
+  .pill .soft { color: rgba(255,255,255,.7); font-weight: 500; }
+  @keyframes pill-in { from { opacity: 0; transform: translateY(8px) scale(.96); } }
+
+  .dock { --icon: 62px; --gap: 8px; display: flex; align-items: center; padding: 10px 12px;
+          border-radius: calc(var(--icon) * .42); max-width: 100%; overflow: hidden;
+          background: rgba(255,255,255,.2); box-shadow: inset 0 0 0 1px rgba(255,255,255,.38), 0 20px 50px rgba(8,10,30,.35);
+          backdrop-filter: blur(30px) saturate(1.5); -webkit-backdrop-filter: blur(30px) saturate(1.5); }
+  .tile { width: calc(var(--icon) + var(--gap)); flex: none; display: grid; place-items: center; position: relative;
+          transition: width .55s cubic-bezier(.3,.7,.2,1); }
+  .tile img { width: var(--icon); height: var(--icon); display: block; transform-origin: 50% 100%;
+              transition: transform .6s cubic-bezier(.25,1.6,.4,1), opacity .35s; }
+  .tile.enter, .tile.leave { width: 0; }
+  .tile.enter img, .tile.leave img { transform: scale(0); opacity: 0; }
+  .tile.leave img { transition: transform .4s ease-in, opacity .3s; }
+  .tile.fresh::after { content: ""; position: absolute; bottom: -7px; width: 5px; height: 5px; border-radius: 50%;
+                       background: #fff; }
+  .tile.fresh img { transform: translateY(-6px); }
+  .tile:hover img { transform: translateY(-6px) scale(1.08); }
+
+  .scrub { display: flex; align-items: center; gap: 14px; width: min(640px, 100%); }
+  .play { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer; display: grid;
+          place-items: center; background: rgba(255,255,255,.16); box-shadow: inset 0 0 0 1px rgba(255,255,255,.3); color: #fff; }
+  .play svg { width: 14px; height: 14px; }
+  input[type=range] { flex: 1; accent-color: #fff; height: 28px; cursor: pointer; }
+  .scrub-labels { display: flex; justify-content: space-between; width: min(640px, 100%); padding-left: 54px;
+                  font-size: 13px; color: rgba(255,255,255,.7); margin-top: -12px; }
+  .demo-note { font-size: 13px; color: rgba(255,255,255,.62); margin: 0; }
+
+  /* ---------- sections ---------- */
+  section { padding: clamp(72px, 11vw, 140px) 0; }
+  h2 { font-size: clamp(34px, 4.6vw, 60px); line-height: 1.03; letter-spacing: -0.035em; font-weight: 800; margin: 0 0 18px;
+       max-width: 16ch; }
+  .intro { font-size: 20px; color: var(--ink-2); max-width: 54ch; margin: 0 0 48px; }
+
+  .films { display: grid; grid-template-columns: minmax(0, 3.2fr) minmax(0, 1fr); gap: 24px; align-items: end; }
+  .films figure { margin: 0; }
+  .films video { width: 100%; display: block; border-radius: 20px; background: var(--indigo);
+                 box-shadow: 0 30px 60px -20px rgba(27,31,74,.45); }
+  .films figcaption { font-size: 15px; color: var(--ink-2); margin-top: 12px; }
+
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+           gap: 40px; counter-reset: step; }
+  .steps li { counter-increment: step; border-top: 2px solid var(--ink); padding-top: 22px; }
+  .steps li::before { content: counter(step); display: block; font-size: 54px; font-weight: 800; letter-spacing: -0.04em;
+                      line-height: 1; margin-bottom: 18px; color: var(--violet); }
+  .steps h3 { font-size: 22px; letter-spacing: -0.015em; margin: 0 0 8px; }
+  .steps p { margin: 0; color: var(--ink-2); }
+  .steps code { font: 15px var(--mono); }
+
+  .install { background: var(--card); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; border-radius: 999px; background: var(--page);
+          width: fit-content; max-width: 100%; margin-bottom: 28px; }
+  .tabs button { border: 0; background: none; color: var(--ink-2); font: 600 15px var(--font); height: 40px;
+                 padding: 0 18px; border-radius: 999px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--ink); color: var(--page); }
+  .panel[hidden] { display: none; }
+  .panel p { color: var(--ink-2); max-width: 62ch; margin: 0 0 18px; }
+  .code { position: relative; background: var(--code); color: var(--code-ink); border-radius: 18px; margin: 0 0 18px; }
+  .code pre { margin: 0; padding: 22px 110px 22px 24px; overflow-x: auto; font: 15px/1.7 var(--mono); }
+  .code .c { color: #8c90b8; }
+  .copy { position: absolute; top: 14px; right: 14px; height: 34px; padding: 0 14px; border-radius: 999px; border: 0;
+          cursor: pointer; background: rgba(255,255,255,.12); color: #fff; font: 600 13px var(--font); }
+  .copy:hover { background: rgba(255,255,255,.2); }
+  .asks { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 0; padding: 0; list-style: none; }
+  .asks li { padding: 10px 16px; border-radius: 16px; background: var(--page); font-size: 15px; }
+
+  .local { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+  .facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+  .facts li { padding-left: 34px; position: relative; color: var(--ink-2); }
+  .facts li::before { content: ""; position: absolute; left: 0; top: 5px; width: 18px; height: 18px; border-radius: 6px;
+                      background: linear-gradient(135deg, var(--teal), var(--violet)); }
+  .facts strong { color: var(--ink); }
+
+  footer { padding: 40px 0 60px; color: var(--ink-2); font-size: 15px; }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+  @media (max-width: 820px) {
+    .films { grid-template-columns: 1fr; }
+    .films figure:last-child { max-width: 320px; }
+    .steps, .local { grid-template-columns: 1fr; gap: 32px; }
+    .menubar nav a:not(:last-child) { display: none; }
+    .dock { padding: 8px 6px; --gap: 4px; }
+    .pill { height: 34px; font-size: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tile, .tile img, .pill { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="menubar">
+    <span>Dock Timelapse</span>
+    <nav aria-label="Sections">
+      <a href="#films">Videos</a>
+      <a href="#how">How it works</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/bcldvd/dock-timelapse">GitHub</a>
+    </nav>
+  </div>
+
+  <div class="hero-copy">
+    <h1>Watch your Dock grow up.</h1>
+    <p class="lede">Dock Timelapse records the apps you pin to your Mac's Dock, day after day, and turns months of
+      changes into a timelapse worth sharing.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="#install">Install</a>
+      <a class="btn btn-glass" href="https://github.com/bcldvd/dock-timelapse">View on GitHub</a>
+    </div>
+  </div>
+
+  <div class="stage" aria-label="Interactive demo Dock">
+    <div class="readout" aria-live="polite"><span class="date" id="date"></span><span class="day" id="day"></span></div>
+    <div class="pills" id="pills"></div>
+    <div class="dock" id="dock"></div>
+    <div class="scrub">
+      <button class="play" id="play" aria-label="Replay the timeline">
+        <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg>
+      </button>
+      <input type="range" id="range" min="0" max="0" value="0" step="1" aria-label="Move through the Dock's history">
+    </div>
+    <div class="scrub-labels"><span id="from"></span><span id="to"></span></div>
+    <p class="demo-note">A demo Dock with an invented nine-month history. Drag the timeline to explore it.</p>
+  </div>
+</header>
+
+<main>
+  <section id="films">
+    <div class="wrap">
+      <h2>Two videos, ready for any screen.</h2>
+      <p class="intro">Every render gives you a widescreen cut and a vertical cut. Apps spring in, hand over their spot
+        and get a label right beside them, while the date and day count move with your story.</p>
+      <div class="films">
+        <figure>
+          <video src="media/dock-landscape.mp4" poster="media/poster-landscape.png" autoplay muted loop playsinline
+                 preload="metadata" aria-label="Landscape timelapse of a Dock"></video>
+          <figcaption>Landscape, 1920 × 1080, 60 fps</figcaption>
+        </figure>
+        <figure>
+          <video src="media/dock-portrait.mp4" poster="media/poster-portrait.png" autoplay muted loop playsinline
+                 preload="metadata" aria-label="Portrait timelapse of a Dock"></video>
+          <figcaption>Portrait, 1080 × 1920</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" style="padding-top:0">
+    <div class="wrap">
+      <h2>Set it once. Enjoy it for months.</h2>
+      <p class="intro">A tiny background agent keeps the record for you, so the timelapse builds itself while you work.</p>
+      <ol class="steps">
+        <li>
+          <h3>Start recording</h3>
+          <p>Run <code>dock-timelapse install</code>, or just ask your AI agent. An hourly agent checks your Dock in the background.</p>
+        </li>
+        <li>
+          <h3>Keep working</h3>
+          <p>Each day your Dock changes, it saves the app list, every icon in high resolution and your wallpaper.</p>
+        </li>
+        <li>
+          <h3>Render the story</h3>
+          <p>Run <code>dock-timelapse render</code> whenever you like. Want a first look today? <code>preview</code> invents a past that ends with your real Dock.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="install" class="install">
+    <div class="wrap">
+      <h2>Install it your way.</h2>
+      <p class="intro">Use it from the terminal or through the AI agent you already use. Everything needs macOS and
+        <a href="https://docs.astral.sh/uv/">uv</a>; ffmpeg comes bundled.</p>
+
+      <div class="tabs" role="tablist" aria-label="Install options">
+        <button role="tab" aria-selected="true" aria-controls="p-claude" id="t-claude">Claude Code</button>
+        <button role="tab" aria-selected="false" aria-controls="p-skills" id="t-skills">Codex, Cursor &amp; more</button>
+        <button role="tab" aria-selected="false" aria-controls="p-mcp" id="t-mcp">MCP clients</button>
+        <button role="tab" aria-selected="false" aria-controls="p-cli" id="t-cli">Terminal</button>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-claude" aria-labelledby="t-claude">
+        <p>The plugin adds the skill and the MCP server in one go. Run these inside Claude Code:</p>
+        <div class="code"><pre>/plugin marketplace add bcldvd/dock-timelapse
+/plugin install dock-timelapse@dock-timelapse</pre><button class="copy">Copy</button></div>
+        <p>Then ask in your own words:</p>
+        <ul class="asks">
+          <li>Start recording my Dock</li>
+          <li>Show me what my Dock timelapse will look like</li>
+          <li>Which apps did I add since June?</li>
+        </ul>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-skills" aria-labelledby="t-skills" hidden>
+        <p>The skill follows the open <a href="https://agentskills.io">Agent Skills</a> format, so it works with Codex,
+          Cursor, Gemini CLI, GitHub Copilot and every agent that reads <code>SKILL.md</code>.</p>
+        <div class="code"><pre>npx skills add bcldvd/dock-timelapse -y</pre><button class="copy">Copy</button></div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-mcp" aria-labelledby="t-mcp" hidden>
+        <p>Add the server to Claude Desktop, Cursor, VS Code or any MCP client:</p>
+        <div class="code"><pre>{
+  "mcpServers": {
+    "dock-timelapse": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/bcldvd/dock-timelapse", "dock-timelapse", "mcp"]
+    }
+  }
+}</pre><button class="copy">Copy</button></div>
+        <p>For Codex, in <code>~/.codex/config.toml</code>:</p>
+        <div class="code"><pre>[mcp_servers.dock-timelapse]
+command = "uvx"
+args = ["--from", "git+https://github.com/bcldvd/dock-timelapse", "dock-timelapse", "mcp"]</pre><button class="copy">Copy</button></div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-cli" aria-labelledby="t-cli" hidden>
+        <div class="code"><pre>uv tool install git+https://github.com/bcldvd/dock-timelapse
+
+dock-timelapse install   <span class="c"># start recording</span>
+dock-timelapse preview   <span class="c"># your video today, with an invented past</span>
+dock-timelapse render    <span class="c"># the real timelapse, in ~/Movies/Dock Timelapse</span></pre><button class="copy">Copy</button></div>
+        <p>Add <code>--format portrait</code>, <code>--background white</code> or <code>--screenshots</code> to
+          tailor it. <code>dock-timelapse status</code> lists every change it has recorded.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap local">
+      <div>
+        <h2>Your Dock stays on your Mac.</h2>
+        <p class="intro" style="margin:0">Recording, rendering and storage all happen locally. The code is open
+          source under the MIT license, so you can read every line.</p>
+      </div>
+      <ul class="facts">
+        <li><strong>Reads the Dock's own list.</strong> It knows exactly which apps are pinned, in order, up to System Settings.</li>
+        <li><strong>Light on your Mac.</strong> One quick check an hour, and a snapshot only on days your Dock changes.</li>
+        <li><strong>Your files, your folder.</strong> History lives in <code>~/Library/Application Support/dock-timelapse</code> and videos land in <code>~/Movies</code>.</li>
+        <li><strong>Screenshots are your call.</strong> Turn them on with <code>--screenshots</code> for a pixel-perfect record of each change.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Dock Timelapse, open source under MIT.</span>
+    <a href="https://github.com/bcldvd/dock-timelapse">github.com/bcldvd/dock-timelapse</a>
+  </div>
+</footer>
+
+<script>
+(async () => {
+  const states = await (await fetch("data.json")).json();
+  const $ = (id) => document.getElementById(id);
+  const dock = $("dock"), range = $("range"), pills = $("pills");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fmt = (d) => new Date(d + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  const short = (d) => new Date(d + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  range.max = states.length - 1;
+  // Size icons so the fullest Dock in the history fits the screen.
+  const most = Math.max(...states.map((s) => s.apps.length));
+  const fit = () => {
+    const gap = innerWidth < 820 ? 4 : 8;
+    const room = Math.min(innerWidth - 32, 1180) - 28;
+    dock.style.setProperty("--icon", `${Math.max(16, Math.min(62, Math.floor(room / most - gap)))}px`);
+  };
+  fit(); addEventListener("resize", fit);
+  $("from").textContent = short(states[0].date);
+  $("to").textContent = short(states.at(-1).date);
+  const tiles = new Map();
+
+  function tile(app) {
+    const el = document.createElement("div");
+    el.className = "tile enter";
+    el.dataset.key = app.key;
+    const img = new Image();
+    img.src = app.icon; img.alt = app.label; img.title = app.label; img.draggable = false;
+    el.append(img);
+    return el;
+  }
+
+  function show(i) {
+    const s = states[i];
+    const next = s.apps.map((a) => a.key);
+    const keep = new Set(next);
+    const old = [...dock.children].filter((el) => !el.classList.contains("leave")).map((el) => el.dataset.key);
+    const fresh = new Set(s.changes.filter((c) => c.kind !== "removed").map((c) => s.apps.find((a) => a.label === c.label)?.key));
+    // Merge old and new orders so departing icons shrink where they were.
+    const merged = []; let p = 0;
+    for (const k of next) {
+      while (p < old.length && !keep.has(old[p])) merged.push(old[p++]);
+      if (old[p] === k) p++;
+      merged.push(k);
+    }
+    while (p < old.length) { if (!keep.has(old[p])) merged.push(old[p]); p++; }
+    for (const k of merged) {
+      let el = tiles.get(k);
+      if (!el) { el = tile(s.apps.find((a) => a.key === k)); tiles.set(k, el); }
+      dock.append(el);
+      el.classList.toggle("fresh", fresh.has(k));
+      if (keep.has(k)) {
+        el.classList.remove("leave");
+        requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove("enter")));
+      } else {
+        el.classList.add("leave");
+        setTimeout(() => { if (el.classList.contains("leave")) { el.remove(); tiles.delete(k); } }, 600);
+      }
+    }
+    $("date").textContent = fmt(s.date);
+    $("day").textContent = `Day ${s.day}`;
+    pills.replaceChildren(...s.changes.map((c) => {
+      const el = document.createElement("span");
+      el.className = "pill";
+      const sign = c.kind === "added" ? ["add", "+"] : c.kind === "replaced" ? ["swap", "⇄"] : c.kind === "removed" ? ["out", "–"] : ["swap", "↕"];
+      el.innerHTML = `<span class="sign ${sign[0]}" aria-hidden="true">${sign[1]}</span>`;
+      const t = document.createElement("span");
+      t.textContent = c.kind === "replaced" ? c.label : c.label;
+      el.append(t);
+      if (c.kind === "replaced") { const o = document.createElement("span"); o.className = "soft"; o.textContent = `replaces ${c.old}`; el.append(o); }
+      if (c.kind === "removed") { const o = document.createElement("span"); o.className = "soft"; o.textContent = "makes room"; el.append(o); }
+      return el;
+    }));
+    range.value = i;
+  }
+
+  let timer = null;
+  function play() {
+    clearInterval(timer);
+    let i = 0; show(0);
+    timer = setInterval(() => { i += 1; if (i >= states.length) return clearInterval(timer); show(i); }, 2000);
+  }
+  range.addEventListener("input", () => { clearInterval(timer); show(+range.value); });
+  $("play").addEventListener("click", play);
+  if (reduce) show(states.length - 1); else play();
+
+  // Install tabs
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  tabs.forEach((t) => t.addEventListener("click", () => {
+    tabs.forEach((o) => { o.setAttribute("aria-selected", o === t); $(o.getAttribute("aria-controls")).hidden = o !== t; });
+  }));
+  tabs.forEach((t, k) => t.addEventListener("keydown", (e) => {
+    const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (d) { const n = tabs[(k + d + tabs.length) % tabs.length]; n.focus(); n.click(); }
+  }));
+
+  // Copy buttons
+  document.querySelectorAll(".copy").forEach((b) => b.addEventListener("click", async () => {
+    const text = b.previousElementSibling.innerText.replace(/\s+#.*$/gm, "");
+    try { await navigator.clipboard.writeText(text); b.textContent = "Copied"; }
+    catch { b.textContent = "Select and copy"; }
+    setTimeout(() => (b.textContent = "Copy"), 1600);
+  }));
+})();
+</script>
+</body>
+</html>

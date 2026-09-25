@@ -141,3 +141,20 @@ def test_added_tiles_never_draw_bigger_than_their_slot_while_growing():
         for tile in t.at(k * 0.05).tiles:
             if 0 < tile.slot < 0.95:
                 assert tile.scale <= tile.slot * 1.1 + 1e-9
+
+
+def test_single_snapshot_summary_reads_naturally():
+    from dock_timelapse.render import Renderer
+
+    sm_scenes = build_scenes(snaps(("2026-09-25", "abc")))
+    t = Timeline(sm_scenes, T)
+    assert t.at(t.duration).progress == pytest.approx(1)  # a lone snapshot sits at the end of its bar
+    assert Renderer.headline(summarize_(sm_scenes)) == "Day 1.  Your Dock today."
+    two = build_scenes(snaps(("2026-01-01", "ab"), ("2026-01-02", "abc")))
+    assert Renderer.headline(summarize_(two)) == "2 days.  1 change."
+
+
+def summarize_(scenes):
+    from dock_timelapse.timeline import summarize
+
+    return summarize(scenes)

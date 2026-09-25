@@ -257,7 +257,7 @@ class Renderer:
                 cx += b + gap
             elif p[0] == "icon":
                 ic = self._icon(p[1], isz, gray=p[2])
-                layer.alpha_composite(_with_alpha(ic, 0.55) if p[2] else ic, (int(cx), int(40 + (h - isz) / 2)))
+                layer.alpha_composite(_with_alpha(ic, 0.8) if p[2] else ic, (int(cx), int(40 + (h - isz) / 2)))
                 cx += isz + gap
             else:
                 d.text((cx, 40 + h / 2), p[1], font=font(fs, p[3]), fill=p[2], anchor="lm")
@@ -330,7 +330,8 @@ class Renderer:
             cy = F.height * (0.3 if land else 0.14)
             k = s.title
             self._text(draw, (F.width / 2, cy), "My Dock", 120 if land else 128, 700, anchor="ms", alpha=k)
-            span = f"{self._first.strftime('%B %Y')} – {self._last.strftime('%B %Y')}"
+            a, b = self._first.strftime("%B %Y"), self._last.strftime("%B %Y")
+            span = a if a == b else f"{a} – {b}"
             self._text(draw, (F.width / 2, cy + 64), span, 40, 450, self.theme["fg2"], anchor="ms", alpha=k)
 
     def _draw_progress(self, draw, s: FrameState):
@@ -364,19 +365,26 @@ class Renderer:
         rise = 24 * (1 - ease_out(a))
         if land:
             cx, y = F.width / 2, F.height * 0.25 + rise
-            self._text(draw, (cx, y), f"{sm.days} days.  {sm.n_changes} changes.", 84, 700, anchor="ms", alpha=a)
+            self._text(draw, (cx, y), self.headline(sm), 84, 700, anchor="ms", alpha=a)
             lines = self._summary_lines(sm)
             for k, line in enumerate(lines):
                 self._text(draw, (cx, y + 66 + k * 46), line, 34, 450, self.theme["fg2"], anchor="ms", alpha=a)
         else:
             x, y = F.margin, 150 + rise
             self._text(draw, (x, y), "MY DOCK", 26, 600, self.theme["fg2"], tracking=0.14, alpha=a)
-            self._text(draw, (x, y + 30), f"{sm.days} days.", 92, 700, alpha=a)
-            self._text(draw, (x, y + 130), f"{sm.n_changes} changes.", 92, 700, alpha=a)
+            first_line, second_line = self.headline(sm).split("  ")
+            self._text(draw, (x, y + 30), first_line, 92, 700, alpha=a)
+            self._text(draw, (x, y + 130), second_line, 92, 700, alpha=a)
             x = g.cross + g.thickness / 2 + 60
             for k, line in enumerate(self._summary_lines(sm, wrap=True)):
                 self._text(draw, (x, F.height * 0.42 + k * 50 + rise), line, 36, 600 if line.endswith(":") else 450,
                            self.theme["fg" if line.endswith(":") else "fg2"], alpha=a)
+
+    @staticmethod
+    def headline(sm: Summary) -> str:
+        if sm.n_changes == 0:
+            return f"Day {sm.days}.  Your Dock today."
+        return f"{sm.days} day{'s' * (sm.days != 1)}.  {sm.n_changes} change{'s' * (sm.n_changes != 1)}."
 
     @staticmethod
     def _summary_lines(sm: Summary, wrap: bool = False) -> list[str]:
@@ -388,6 +396,9 @@ class Renderer:
         if sm.arrived:
             lines += (["Arrived:", names(sm.arrived, 3)] if wrap else [f"Arrived  {names(sm.arrived)}"])
         if sm.left:
-            lines += (["Left:", names(sm.left, 3)] if wrap else [f"Left  {names(sm.left)}"])
-        lines.append(f"{len(sm.stayed)} apps there since day one")
+            lines += (["Moved on from:", names(sm.left, 3)] if wrap else [f"Moved on from  {names(sm.left)}"])
+        if sm.n_changes:
+            lines.append(f"{len(sm.stayed)} app{'s' * (len(sm.stayed) != 1)} there since day one")
+        else:
+            lines.append(f"{sm.final_count} apps, recorded from here on")
         return lines

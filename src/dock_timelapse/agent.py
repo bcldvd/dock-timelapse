@@ -42,6 +42,28 @@ def capture_command(executable: str | None = None, uvx: str | None = None, data:
     return [executable, *extra, "capture"]
 
 
+def persistent_executable(executable: str, uv: str | None, run=None) -> str:
+    """A throwaway `uvx` environment can vanish (and breaks permissions), so install a stable `uv tool` copy."""
+    if not any(m in executable for m in EPHEMERAL_MARKERS) or not uv:
+        return executable
+
+    def _run(cmd: list[str]) -> str:
+        return subprocess.run(cmd, check=True, capture_output=True, text=True).stdout.strip()
+
+    run = run or _run
+    run([uv, "tool", "install", "--quiet", PACKAGE_SPEC])
+    return str(Path(run([uv, "tool", "dir", "--bin"])) / "dock-timelapse")
+
+
+def python_for(executable: str) -> Path:
+    """The Python interpreter behind an entry-point script (what macOS permissions attach to)."""
+    exe = Path(executable).resolve()
+    for cand in (exe.parent / "python3", exe.parent / "python"):
+        if cand.exists():
+            return cand.resolve()
+    return Path(sys.executable).resolve()
+
+
 def _launchctl(*args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["/bin/launchctl", *args], capture_output=True, text=True)
 
@@ -49,8 +71,8 @@ def _launchctl(*args: str) -> subprocess.CompletedProcess:
 def install(data: Path, default_data: Path) -> tuple[Path, list[str]]:
     uninstall(quiet=True)
     data.mkdir(parents=True, exist_ok=True)
-    cmd = capture_command(executable=os.path.abspath(sys.argv[0]), uvx=shutil.which("uvx"), data=data,
-                          default_data=default_data)
+    exe = persistent_executable(os.path.abspath(sys.argv[0]), uv=shutil.which("uv"))
+    cmd = capture_command(executable=exe, uvx=shutil.which("uvx"), data=data, default_data=default_data)
     path = plist_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(plistlib.dumps(launchd_plist(cmd, data / "capture.log")))
@@ -71,5 +93,13 @@ def uninstall(quiet: bool = False) -> list[str]:
     return removed
 
 
-def installed() -> bool:
-    return plist_path().exists()
+def installed(data: Path | None = None, default_data: Path | None = None) -> bool:
+    """Is the agent installed (and, when `data` is given, recording into that data dir)?"""
+    path = plist_path()
+    if not path.exists():
+        return False
+    if data is None:
+        return True
+    args = plistlib.loads(path.read_bytes()).get("ProgramArguments", [])
+    target = Path(args[args.index("--data") + 1]) if "--data" in args else default_data
+    return target is not None and Path(target).resolve() == Path(data).resolve()

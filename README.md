@@ -60,7 +60,7 @@ timelapse of my Dock"*, *"which apps did I add since June?"*
 The skill follows the open [Agent Skills](https://agentskills.io) format:
 
 ```bash
-npx skills add bcldvd/dock-timelapse
+npx skills add bcldvd/dock-timelapse -y
 ```
 
 ### MCP server (Claude Desktop, Codex, Cursor, VS Code, …)

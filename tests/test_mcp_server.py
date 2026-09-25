@@ -20,7 +20,9 @@ def test_current_dock_and_history(tmp_path):
 def test_render_without_history_explains_what_to_do(tmp_path):
     import pytest
 
-    with pytest.raises(ValueError, match="render_preview"):
+    from mcp.server.mcpserver.exceptions import ToolError
+
+    with pytest.raises(ToolError, match="render_preview"):
         DockTools(tmp_path, mac=FakeMac()).render()
 
 
@@ -28,4 +30,26 @@ def test_server_lists_expected_tools(tmp_path):
     server = build_server(tmp_path)
     names = {t.name for t in asyncio.run(server.list_tools())}
     assert names == {"dock_status", "current_dock", "dock_history", "install_recording", "uninstall_recording",
-                     "capture_now", "render_timelapse", "render_preview"}
+                     "capture_now", "render_timelapse", "render_preview", "render_frame"}
+
+
+def test_tool_errors_reach_the_agent_with_their_message(tmp_path):
+    import pytest
+    from mcp.server.mcpserver.exceptions import ToolError
+
+    server = build_server(tmp_path)
+    with pytest.raises(ToolError, match="call render_preview"):
+        asyncio.run(server.call_tool("render_timelapse", {}))
+
+
+def test_format_is_an_enum_in_the_schema(tmp_path):
+    tools = {t.name: t for t in asyncio.run(build_server(tmp_path).list_tools())}
+    props = tools["render_timelapse"].input_schema["properties"]
+    assert set(props["format"]["enum"]) == {"landscape", "portrait", "both"}
+    assert tools["dock_status"].annotations.read_only_hint is True
+
+
+def test_server_reports_its_version(tmp_path):
+    from importlib.metadata import version
+
+    assert build_server(tmp_path).version == version("dock-timelapse")

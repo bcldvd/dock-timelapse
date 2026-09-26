@@ -43,6 +43,25 @@ func rendersAPlayableMP4AndLeavesNothingElse(_ format: VideoFormat) async throws
     #expect(try Data(contentsOf: out) == Data("old".utf8))  // a cancelled render keeps the previous video
 }
 
+@Test func stillReplacesTheOldPNGAndLeavesNoTemporaryBehind() throws {
+    let dir = outDir()
+    let out = dir.appending(path: "still.png")
+    try Data("old".utf8).write(to: out)
+    try renderStill(dataRoot: renderData, format: .landscape, at: 1, to: out)
+    #expect(try Data(contentsOf: out).starts(with: [0x89, 0x50, 0x4E, 0x47]))
+    #expect(try FileManager.default.contentsOfDirectory(atPath: dir.path) == ["still.png"])
+}
+
+@Test func failedStillLeavesNoTemporaryBehind() throws {
+    let dir = outDir()
+    let out = dir.appending(path: "still.png")
+    try FileManager.default.createDirectory(at: out.appending(path: "in-the-way"), withIntermediateDirectories: true)
+    #expect(throws: DockError.storageUnavailable(out.path)) {
+        try renderStill(dataRoot: renderData, format: .landscape, at: 1, to: out)
+    }
+    #expect(try FileManager.default.contentsOfDirectory(atPath: dir.path) == ["still.png"])
+}
+
 @Test func renderingWithoutHistoryExplains() async {
     await #expect(throws: DockError.noHistory) {
         try await renderVideo(dataRoot: outDir(), format: .landscape, to: outDir().appending(path: "x.mp4"))

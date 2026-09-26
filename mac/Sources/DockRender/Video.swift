@@ -138,11 +138,17 @@ public func renderStill(dataRoot: URL, format: VideoFormat, at t: Double, to out
     return out
 }
 
+/// Written beside `out` then renamed over it, so `out` is either the previous file or the complete new one.
 public func writePNG(_ image: CGImage, to out: URL) throws {
-    try FileManager.default.createDirectory(at: out.deletingLastPathComponent(), withIntermediateDirectories: true)
-    guard let dest = CGImageDestinationCreateWithURL(out as CFURL, UTType.png.identifier as CFString, 1, nil) else {
+    let dir = out.deletingLastPathComponent()
+    try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    let tmp = dir.appending(path: ".\(out.lastPathComponent).\(UUID().uuidString).tmp")
+    defer { try? FileManager.default.removeItem(at: tmp) }
+    guard let dest = CGImageDestinationCreateWithURL(tmp as CFURL, UTType.png.identifier as CFString, 1, nil) else {
         throw DockError.storageUnavailable(out.path)
     }
     CGImageDestinationAddImage(dest, image, nil)
-    guard CGImageDestinationFinalize(dest) else { throw DockError.storageUnavailable(out.path) }
+    guard CGImageDestinationFinalize(dest), rename(tmp.path, out.path) == 0 else {
+        throw DockError.storageUnavailable(out.path)
+    }
 }

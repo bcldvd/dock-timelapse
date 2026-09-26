@@ -106,6 +106,26 @@ func tmApps(_ labels: String...) -> [DockApp] {
         #expect(error?.recovery == .openFullDiskAccessSettings)
     }
 
+    @Test func brokenBackupIsSkippedNotBlamedOnPermissions() throws {
+        let broken = try makeBackup(tm, "2025-05-01-090000.backup", ["Arc"])
+        let plist = try #require(findDockPlist(Backup(when: .now(), root: broken), home: HOME))
+        try FileManager.default.removeItem(at: plist)
+        try FileManager.default.createDirectory(at: plist, withIntermediateDirectories: true)  // unreadable as a file
+        try makeBackup(tm, "2025-06-01-090000.backup", ["Arc", "Xcode"])
+        let r = try importBackups(try backups(in: tm), into: store, mac: mac(), home: HOME)
+        #expect(r == ImportResult(backups: 2, read: 1, added: 1, first: "2025-06-01", last: "2025-06-01"))
+    }
+
+    @Test func permissionDeniedPlistPointsToFullDiskAccess() throws {
+        let root = try makeBackup(tm, "2025-06-01-090000.backup", ["Arc"])
+        let plist = try #require(findDockPlist(Backup(when: .now(), root: root), home: HOME))
+        try FileManager.default.setAttributes([.posixPermissions: 0], ofItemAtPath: plist.path)
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: plist.path) }
+        #expect(throws: DockError.fullDiskAccessNeeded(path: plist.path)) {
+            try importBackups(try backups(in: tm), into: store, mac: mac(), home: HOME)
+        }
+    }
+
     @Test func unreadableFolderPointsToFullDiskAccess() throws {
         let locked = dir.appending(path: "locked")
         try FileManager.default.createDirectory(at: locked, withIntermediateDirectories: true)

@@ -93,8 +93,12 @@ public func importBackups(_ backups: [Backup], into store: Store, mac: MacSystem
     for (k, b) in backups.enumerated() {
         progress?(k, backups.count)
         guard let plist = findDockPlist(b, home: home) else { continue }
-        guard let data = FileManager.default.contents(atPath: plist.path) else {
-            throw DockError.fullDiskAccessNeeded(path: plist.path)
+        let data: Data
+        do {
+            data = try Data(contentsOf: plist)
+        } catch {
+            if isPermissionDenied(error) { throw DockError.fullDiskAccessNeeded(path: plist.path) }
+            continue  // a damaged backup: skip it
         }
         guard let prefs = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
         else { continue }
@@ -140,4 +144,12 @@ public func importBackups(_ backups: [Backup], into store: Store, mac: MacSystem
     let added = snaps.isEmpty ? 0 : try store.merge(snaps)
     return ImportResult(backups: backups.count, read: states.count, added: added,
                         first: snaps.first?.date, last: snaps.last?.date)
+}
+
+func isPermissionDenied(_ error: Error) -> Bool {
+    let ns = error as NSError
+    if ns.domain == NSCocoaErrorDomain && ns.code == NSFileReadNoPermissionError { return true }
+    let posix = (ns.userInfo[NSUnderlyingErrorKey] as? NSError).flatMap { $0.domain == NSPOSIXErrorDomain ? $0 : nil }
+        ?? (ns.domain == NSPOSIXErrorDomain ? ns : nil)
+    return posix.map { $0.code == Int(EPERM) || $0.code == Int(EACCES) } ?? false
 }

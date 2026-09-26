@@ -36,6 +36,9 @@ public struct Snapshot: Equatable, Sendable, Codable {
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         date = try c.decode(String.self, forKey: .date)
+        guard Day(iso: date) != nil else {
+            throw DecodingError.dataCorruptedError(forKey: .date, in: c, debugDescription: "invalid date \(date)")
+        }
         capturedAt = try c.decodeIfPresent(String.self, forKey: .capturedAt) ?? date
         apps = try c.decode([DockApp].self, forKey: .apps)
         changes = try c.decodeIfPresent([Change].self, forKey: .changes) ?? []
@@ -64,16 +67,18 @@ public struct Snapshot: Equatable, Sendable, Codable {
 ///     checks.json      every day the Dock was inspected
 ///     icons/           app icons as PNG, content-addressed so icon redesigns are kept
 ///     wallpapers/      desktop wallpapers seen over time
-public final class Store: @unchecked Sendable {
+///     .lock            flock'd around every read-modify-write, shared with the Python engine
+public final class Store: Sendable {
     public let root: URL
     private let snapFile: URL
     private let checksFile: URL
-    private let lock = NSLock()
+    private let lockFile: URL
 
     public init(root: URL) throws {
         self.root = root
         snapFile = root.appending(path: "snapshots.json")
         checksFile = root.appending(path: "checks.json")
+        lockFile = root.appending(path: ".lock")
         do {
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         } catch {
@@ -84,8 +89,18 @@ public final class Store: @unchecked Sendable {
     // MARK: persistence
 
     public func snapshots() throws -> [Snapshot] {
-        lock.lock(); defer { lock.unlock() }
-        return try loadSnapshots()
+        try loadSnapshots()
+    }
+
+    /// Run `body` holding an exclusive lock on the data dir, across threads and processes alike.
+    private func exclusively<T>(_ body: () throws -> T) throws -> T {
+        let fd = open(lockFile.path, O_RDWR | O_CREAT | O_CLOEXEC, 0o644)
+        guard fd >= 0 else { throw DockError.storageUnavailable(root.path) }
+        defer { close(fd) }  // releases the lock
+        while flock(fd, LOCK_EX) != 0 {
+            guard errno == EINTR else { throw DockError.storageUnavailable(root.path) }
+        }
+        return try body()
     }
 
     private func loadSnapshots() throws -> [Snapshot] {
@@ -115,8 +130,7 @@ public final class Store: @unchecked Sendable {
     }
 
     public func checkedOn(_ day: Day) -> Bool {
-        lock.lock(); defer { lock.unlock() }
-        return checks().contains(day.iso)
+        checks().contains(day.iso)
     }
 
     private func markChecked(_ day: Day) {
@@ -134,7 +148,11 @@ public final class Store: @unchecked Sendable {
     @discardableResult
     public func observe(_ apps: [DockApp], at now: LocalTime, icons: [String: String] = [:],
                         wallpaper: String? = nil) throws -> Snapshot? {
-        lock.lock(); defer { lock.unlock() }
+        try exclusively { try observeLocked(apps, at: now, icons: icons, wallpaper: wallpaper) }
+    }
+
+    private func observeLocked(_ apps: [DockApp], at now: LocalTime, icons: [String: String],
+                               wallpaper: String?) throws -> Snapshot? {
         let today = now.day.iso
         var snaps = try loadSnapshots()
         markChecked(now.day)
@@ -161,7 +179,10 @@ public final class Store: @unchecked Sendable {
     /// Changes are recomputed across the whole history.
     @discardableResult
     public func merge(_ incoming: [Snapshot]) throws -> Int {
-        lock.lock(); defer { lock.unlock() }
+        try exclusively { try mergeLocked(incoming) }
+    }
+
+    private func mergeLocked(_ incoming: [Snapshot]) throws -> Int {
         let existing = try loadSnapshots()
         var byDay: [String: Snapshot] = [:]
         for s in existing { byDay[s.date] = s }

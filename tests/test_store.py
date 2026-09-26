@@ -123,3 +123,22 @@ def test_merge_is_idempotent(tmp_path):
     assert s.merge(batch) == 2
     assert s.merge([imported("2025-06-01", "a"), imported("2025-09-01", "b")]) == 0
     assert len(s.snapshots()) == 3
+
+
+def test_concurrent_writers_from_separate_stores_lose_nothing(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    Store(tmp_path).observe(apps("a"), D1)
+    n = 24
+
+    def write(k):
+        s = Store(tmp_path)
+        s.observe(apps("a"), D1 + dt.timedelta(days=k + 1))  # marks the day checked
+        day = (dt.date(2020, 1, 1) + dt.timedelta(days=k)).isoformat()
+        s.merge([Snapshot(day, f"{day}T12:00:00", apps(f"x{k}"), source="time-machine")])
+
+    with ThreadPoolExecutor(8) as pool:
+        list(pool.map(write, range(n)))
+    s = Store(tmp_path)
+    assert all(s.checked_on((D1 + dt.timedelta(days=k + 1)).date()) for k in range(n))
+    assert len(s.snapshots()) == n + 1

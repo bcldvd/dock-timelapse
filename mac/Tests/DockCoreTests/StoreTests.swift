@@ -101,6 +101,27 @@ func imported(_ day: String, _ ids: String...) -> Snapshot {
         #expect(try String(contentsOf: dir.appending(path: "snapshots.json"), encoding: .utf8) == "{not json")
     }
 
+    @Test func invalidDateIsReportedAsDamage() throws {
+        let file = dir.appending(path: "snapshots.json")
+        try Data(#"[{"date": "2026-13-45", "captured_at": "2026-13-45T09:00:00", "apps": []}]"#.utf8).write(to: file)
+        #expect(throws: DockError.corruptHistory(file.path)) { try store.snapshots() }
+    }
+
+    /// Every process (app, agent, MCP, CLI) opens its own Store; writes must not clobber each other.
+    @Test func concurrentWritersFromSeparateStoresLoseNothing() throws {
+        try store.observe(apps("a"), at: D1)
+        let n = 24
+        let dir = dir
+        DispatchQueue.concurrentPerform(iterations: n) { k in
+            let s = try! Store(root: dir)
+            let day = D1.day.adding(days: k + 1)
+            try! s.observe(apps("a"), at: LocalTime(day, 9))  // marks the day checked
+            try! s.merge([imported(Day(2020, 1, 1).adding(days: k).iso, "x\(k)")])
+        }
+        for k in 0..<n { #expect(store.checkedOn(D1.day.adding(days: k + 1))) }
+        #expect(try store.snapshots().count == n + 1)
+    }
+
     /// A data dir written by the Python engine loads, and a Swift write keeps every field Python reads.
     @Test func readsAndRoundTripsPythonData() throws {
         let f = try fixture("store") as! [String: String]

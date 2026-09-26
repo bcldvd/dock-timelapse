@@ -1,0 +1,38 @@
+mac/Sources/DockTimelapseCLI/main.swift
+  s_d2c8d5b184db71::t_614e8f4a2c892a 105,108,114,117-118
+  s_d2c8d5b184db71::t_94fcce9f641c36 148-155
+mac/Tests/DockAppModelTests/AppModelTests.swift
+  s_d2c8d5b184db71::t_5ed87f32735759 27,29,35-39,215-260
+mac/Sources/DockCore/Store.swift
+  s_d2c8d5b184db71::t_9ceee859842e22 136-140
+mac/Sources/DockTimelapseApp/MenuPanel.swift
+  s_d2c8d5b184db71::t_f194c1fcfed311 47,54-55
+mac/Tests/DockCoreTests/HealthTests.swift
+  s_d2c8d5b184db71::t_5ed87f32735759 1-41
+mac/Sources/DockAppModel/AppModel.swift
+  s_d2c8d5b184db71::t_614e8f4a2c892a 168-171
+  s_d2c8d5b184db71::t_568112cabd37c1 75-76,117,151-164,167,172-177
+mac/Sources/DockCore/Day.swift
+  s_d2c8d5b184db71::t_9ceee859842e22 87-96
+mac/Sources/DockTimelapseApp/Components.swift
+  s_d2c8d5b184db71::t_f194c1fcfed311 89-91,98-99,104,109-114,119-133
+mac/Sources/DockCore/Health.swift
+  s_d2c8d5b184db71::t_9ceee859842e22 1-9,11-52
+  s_d2c8d5b184db71::t_568112cabd37c1 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "6cd59ff6e8f659a5f0c9c6130287406759bf1ef6",
+  "prompts": {},
+  "sessions": {
+    "s_d2c8d5b184db71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b48e1a08-ecae-45b3-b53f-7582c1477f10",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "David Boclé <bcldvd@users.noreply.github.com>"
+    }
+  }
+}

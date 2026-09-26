@@ -1,0 +1,85 @@
+mac/Sources/DockRender/Renderer.swift
+  s_d2c8d5b184db71::t_1b7bdb2904ecee 69-80
+  s_d2c8d5b184db71::t_9133372c757055 135
+.gitignore
+  s_d2c8d5b184db71::t_712e86a13696d1 14
+mac/Bundle/Info.plist
+  s_d2c8d5b184db71::t_0e04404096f9ce 1-36
+mac/Package.swift
+  s_d2c8d5b184db71::t_e1db97ba14b717 22-23,27
+mac/Sources/DockTimelapseApp/DemoServices.swift
+  s_d2c8d5b184db71::t_0e04404096f9ce 1-51
+  s_d2c8d5b184db71::t_9efbd3336b26a3 52-68,70-73
+  s_d2c8d5b184db71::t_4d2711571e30db 69
+mac/Sources/DockTimelapseApp/RecorderSelfTest.swift
+  s_d2c8d5b184db71::t_18c4a92d982b27 1-25
+mac/scripts/shoot.sh
+  s_d2c8d5b184db71::t_151d962381a55b 14
+  s_d2c8d5b184db71::t_3eb0d81d1d847a 19
+  s_d2c8d5b184db71::t_ed964fa667d86e 1-9,13,15-18,20-27
+  s_d2c8d5b184db71::t_9efbd3336b26a3 10-12
+mac/Sources/DockRender/Assets.swift
+  s_d2c8d5b184db71::t_1b7bdb2904ecee 105-133
+mac/Tests/DockRenderTests/VideoTests.swift
+  s_d2c8d5b184db71::t_1ce09d36411410 1-65
+mac/Sources/DockCore/TimeMachine.swift
+  s_d2c8d5b184db71::t_c27241d8e296bf 79-82
+mac/Tests/DockAppModelTests/AppModelTests.swift
+  s_d2c8d5b184db71::t_81bf0ea1cac2ab 1-208
+mac/scripts/make_icon.py
+  s_d2c8d5b184db71::t_51c4de9d6f3587 1-145
+mac/Sources/DockAppModel/AppModel.swift
+  s_d2c8d5b184db71::t_b606d9eb825803 1-29,34-77,79-149,151-152,154,156-183,185-187,189-236,240,244,246,248,280-281,284-295
+  s_d2c8d5b184db71::t_93cae9082a486e 30-33
+  s_d2c8d5b184db71::t_c0672e243058de 184,188
+  s_d2c8d5b184db71::t_d739fa77b7d220 78,150,153,155,237-239,241-243,245,247,249-279,282-283
+mac/Sources/DockTimelapseApp/SettingsView.swift
+  s_d2c8d5b184db71::t_8c52965a77307c 1-69
+mac/Sources/DockTimelapseApp/MenuPanel.swift
+  s_d2c8d5b184db71::t_91f75eb4106a3f 1-282
+mac/Sources/DockTimelapseApp/PlayerView.swift
+  s_d2c8d5b184db71::t_8c52965a77307c 1-17,19-115,136-137
+  s_d2c8d5b184db71::t_8fb7317005bc25 18,116-135
+mac/scripts/build-app.sh
+  s_d2c8d5b184db71::t_0e04404096f9ce 1-40
+mac/Sources/DockTimelapseApp/Components.swift
+  s_d2c8d5b184db71::t_a6ccd57f36807b 1,3-50,52-53,55,58-60,64-69,71-144
+  s_d2c8d5b184db71::t_9efbd3336b26a3 54,56-57
+  s_d2c8d5b184db71::t_ed964fa667d86e 51,61-63,70
+  s_d2c8d5b184db71::t_9133372c757055 2
+mac/Bundle/io.github.bcldvd.DockTimelapse.recorder.plist
+  s_d2c8d5b184db71::t_0e04404096f9ce 1-25
+mac/Sources/DockTimelapseApp/DockTimelapseApp.swift
+  s_d2c8d5b184db71::t_18c4a92d982b27 123-126
+  s_d2c8d5b184db71::t_903db70aa4f88b 30,49,84-85,91-94,97
+  s_d2c8d5b184db71::t_9efbd3336b26a3 31-37
+  s_d2c8d5b184db71::t_0e04404096f9ce 11-13,16
+  s_d2c8d5b184db71::t_ed964fa667d86e 64-70,95-96
+  s_d2c8d5b184db71::t_8c52965a77307c 1-10,14-15,17-29,38-48,50-63,71-83,86-90,98-122,127-130
+mac/Sources/DockCore/Timeline.swift
+  s_d2c8d5b184db71::t_9133372c757055 32,53,72,90,93,99,107,127,134,209,211,233,316
+mac/Sources/DockTimelapseApp/WelcomeView.swift
+  s_d2c8d5b184db71::t_cc02c2611fbb06 1-10,12-13,24-209,211-283
+  s_d2c8d5b184db71::t_ed964fa667d86e 11,14-23
+  s_d2c8d5b184db71::t_4d2711571e30db 210
+mac/Sources/DockAppModel/Services.swift
+  s_d2c8d5b184db71::t_3aaa9e9be2c3b4 1-64
+mac/Sources/DockRender/Video.swift
+  s_d2c8d5b184db71::t_f514a15cc821f7 101,106,112,117,121-127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "1ec5de5f46052bae5893e57bd0e3e91a6ea1d10a",
+  "prompts": {},
+  "sessions": {
+    "s_d2c8d5b184db71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b48e1a08-ecae-45b3-b53f-7582c1477f10",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "David Boclé <bcldvd@users.noreply.github.com>"
+    }
+  }
+}

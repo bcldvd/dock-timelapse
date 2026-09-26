@@ -1,0 +1,50 @@
+mac/Sources/DockMCP/Tools.swift
+  s_d2c8d5b184db71::t_3180ae8513cd0a 1-37,43-50,52-67,69-80,87-198
+  s_d2c8d5b184db71::t_d9841298c7378b 38-42,51,68
+  s_d2c8d5b184db71::t_f6b2d594c2bf06 81-86
+mac/scripts/make-dmg.sh
+  s_d2c8d5b184db71::t_a9ebfecaeb3675 1-15,17-46
+  s_d2c8d5b184db71::t_f122f61490b1d9 16
+mac/Sources/DockTimelapseApp/DockTimelapseApp.swift
+  s_d2c8d5b184db71::t_4c8225d8a3d754 124
+mac/Tests/DockMCPTests/MCPTests.swift
+  s_d2c8d5b184db71::t_bf3fad8d715853 1-115
+mac/Package.swift
+  s_d2c8d5b184db71::t_3180ae8513cd0a 19,22,29
+mac/Sources/DockTimelapseApp/MoveToApplications.swift
+  s_d2c8d5b184db71::t_4c8225d8a3d754 1,3-8,11-62
+  s_d2c8d5b184db71::t_f82f4495534635 2,9-10
+mac/Sources/DockMac/System.swift
+  s_d2c8d5b184db71::t_f82f4495534635 74-78
+mac/Tests/DockMacTests/DockMacTests.swift
+  s_d2c8d5b184db71::t_f82f4495534635 74-85
+mac/Sources/DockMCP/Server.swift
+  s_d2c8d5b184db71::t_f6b2d594c2bf06 72-74
+  s_d2c8d5b184db71::t_3180ae8513cd0a 1-71,75-77
+mac/Sources/DockTimelapseCLI/main.swift
+  s_d2c8d5b184db71::t_3180ae8513cd0a 3,70,245-251
+.github/workflows/tests.yml
+  s_d2c8d5b184db71::t_c833d78032b3fa 13-21
+plugin/scripts/mcp-server.sh
+  s_d2c8d5b184db71::t_ab1dffb6c31e22 2-9
+.github/workflows/mac-release.yml
+  s_d2c8d5b184db71::t_c833d78032b3fa 1-56
+README.md
+  s_d2c8d5b184db71::t_658ef842be8f6b 40-47,130-150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "4fdb06e516572dce98e5840976a6f8b4543598ec",
+  "prompts": {},
+  "sessions": {
+    "s_d2c8d5b184db71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b48e1a08-ecae-45b3-b53f-7582c1477f10",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "David Boclé <bcldvd@users.noreply.github.com>"
+    }
+  }
+}

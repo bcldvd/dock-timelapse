@@ -44,11 +44,15 @@ struct MenuPanel: View {
                 .frame(width: 30, height: 30)
             VStack(alignment: .leading, spacing: 1) {
                 Text("Dock Timelapse").font(.headline)
-                RecordingBadge(state: model.recorder)
+                RecordingBadge(state: model.recorder, health: model.recorderHealth)
             }
             Spacer()
             if model.recorder == .needsApproval {
                 Button("Allow…") { AppRecorder.openLoginItemsSettings() }
+                    .buttonStyle(.glass)
+                    .controlSize(.small)
+            } else if model.recorder == .on && model.recorderHealth != .healthy {
+                Button("Restart Recording") { model.restartRecording() }
                     .buttonStyle(.glass)
                     .controlSize(.small)
             }

@@ -24,13 +24,19 @@ struct FakeMac: MacSystem {
 final class FakeRecorder: Recorder, @unchecked Sendable {
     var state: RecorderState = .off
     var failWith: DockError?
+    var stopFailWith: DockError?
     var starts = 0
+    var stops = 0
     func start() throws {
         starts += 1
         if let failWith { throw failWith }
         state = .on
     }
-    func stop() throws { state = .off }
+    func stop() throws {
+        stops += 1
+        if let stopFailWith { throw stopFailWith }
+        state = .off
+    }
 }
 
 @MainActor
@@ -204,5 +210,53 @@ func apps(_ ids: [String]) -> [DockApp] { ids.map { apps($0)[0] } }
         none.landscape = false
         none.portrait = false
         #expect(none.formats == [.landscape])  // never render nothing
+    }
+}
+
+@MainActor @Suite struct RecorderHealthTests {
+    func harness(log: String?) -> Harness {
+        let h = Harness()
+        h.recorder.state = .on
+        if let log { CaptureLog.append(log, to: h.dir.appending(path: "data")) }
+        return h
+    }
+
+    @Test func healthyWhenTheJobRanRecently() {
+        let h = harness(log: "2026-09-26T11:00:00 unchanged")
+        h.model.refresh()
+        #expect(h.model.recorderHealth == .healthy)
+    }
+
+    @Test func staleWhenTheJobHasNotRunForADay() {
+        let h = harness(log: "2026-09-24T11:00:00 unchanged")
+        h.model.refresh()
+        #expect(h.model.recorderHealth == .stale(last: LocalTime(Day(2026, 9, 24), 11)))
+    }
+
+    @Test func failingWhenTheLastCaptureErred() {
+        let h = harness(log: "2026-09-26T11:00:00 error: Couldn't read the Dock's settings.")
+        h.model.refresh()
+        #expect(h.model.recorderHealth == .failing("Couldn't read the Dock's settings."))
+    }
+
+    @Test func pausedRecorderHasNothingToReport() {
+        let h = harness(log: "2026-09-24T11:00:00 error: boom")
+        h.recorder.state = .off
+        h.model.refresh()
+        #expect(h.model.recorderHealth == .healthy)
+    }
+
+    @Test func restartRecordingReregistersTheJob() {
+        let h = harness(log: "2026-09-24T11:00:00 unchanged")
+        h.model.restartRecording()
+        #expect(h.recorder.stops == 1 && h.recorder.starts == 1 && h.model.recorder == .on)
+    }
+
+    @Test func stopFailureIsShownNotSwallowed() {
+        let h = harness(log: nil)
+        h.recorder.stopFailWith = .backgroundRecording("launchd said no")
+        h.model.stopRecording()
+        #expect(h.model.recorderError == .backgroundRecording("launchd said no"))
+        #expect(h.model.recorder == .on)
     }
 }

@@ -84,6 +84,16 @@ public struct LocalTime: Hashable, Comparable, Sendable {
 
     public static func now() -> LocalTime { LocalTime(Date()) }
 
+    /// Parses "2026-01-10T09:00:00" (what `iso` writes).
+    public init?(iso: String) {
+        let parts = iso.split(separator: "T", maxSplits: 1)
+        guard parts.count == 2, parts[0].count == 10, let day = Day(iso: String(parts[0])) else { return nil }
+        let hms = parts[1].prefix(8).split(separator: ":").compactMap { Int($0) }
+        guard hms.count == 3, (0..<24).contains(hms[0]), (0..<60).contains(hms[1]), (0..<60).contains(hms[2])
+        else { return nil }
+        self.init(day, hms[0], hms[1], hms[2])
+    }
+
     /// "2026-01-10T09:00:00"
     public var iso: String { day.iso + String(format: "T%02d:%02d:%02d", hour, minute, second) }
 

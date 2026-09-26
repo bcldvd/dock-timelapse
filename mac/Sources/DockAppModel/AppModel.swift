@@ -72,6 +72,8 @@ public final class AppModel {
     public private(set) var snapshots: [Snapshot] = []
     public private(set) var currentDock: [DockApp] = []
     public private(set) var recorder: RecorderState = .off
+    /// Whether the job, when on, is actually capturing.
+    public private(set) var recorderHealth: RecorderHealth = .healthy
     public private(set) var timeMachineConfigured = false
     public private(set) var legacyRecorderFound = false
     public private(set) var historyError: DockError?
@@ -112,6 +114,7 @@ public final class AppModel {
         }
         currentDock = (try? services.mac.currentDock()) ?? snapshots.last?.apps ?? []
         recorder = services.recorder.state
+        recorderHealth = recorder == .on ? DockCore.recorderHealth(dataDir: services.dataDir, now: services.now()) : .healthy
         timeMachineConfigured = services.timeMachineConfigured()
         legacyRecorderFound = services.legacyRecorderInstalled()
     }
@@ -145,20 +148,38 @@ public final class AppModel {
     // MARK: recording
 
     public func startRecording() {
-        do {
+        withRecorder {
             try services.recorder.start()
-            recorderError = nil
             _ = try? runCapture(store: Store(root: services.dataDir), mac: services.mac, now: services.now())
+        }
+    }
+
+    public func stopRecording() {
+        withRecorder { try services.recorder.stop() }
+    }
+
+    /// Re-register the job when it has stopped capturing; registering runs it right away.
+    public func restartRecording() {
+        withRecorder {
+            try services.recorder.stop()
+            try services.recorder.start()
+            _ = try? runCapture(store: Store(root: services.dataDir), mac: services.mac, now: services.now())
+        }
+        Task { [weak self] in  // the job logs its first run a moment later
+            try? await Task.sleep(for: .seconds(5))
+            self?.refresh()
+        }
+    }
+
+    private func withRecorder(_ body: () throws -> Void) {
+        do {
+            try body()
+            recorderError = nil
         } catch let error as DockError {
             recorderError = error
         } catch {
             recorderError = .backgroundRecording(error.localizedDescription)
         }
-        refresh()
-    }
-
-    public func stopRecording() {
-        try? services.recorder.stop()
         refresh()
     }
 

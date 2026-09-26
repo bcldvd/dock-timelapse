@@ -133,6 +133,11 @@ public final class Store: Sendable {
         checks().contains(day.iso)
     }
 
+    /// The most recent day the Dock was inspected.
+    public func lastChecked() -> Day? {
+        checks().compactMap(Day.init(iso:)).max()
+    }
+
     private func markChecked(_ day: Day) {
         var list = checks()
         guard !list.contains(day.iso) else { return }

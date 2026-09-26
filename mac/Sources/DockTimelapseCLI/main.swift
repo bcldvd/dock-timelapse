@@ -102,25 +102,20 @@ struct Capture: ParsableCommand {
     static let configuration = CommandConfiguration(abstract: "Record the Dock now if it changed (what the background job runs).")
     @OptionGroup var options: Options
 
+    /// Exits 1 on failure (launchd just logs it and runs again next hour); the app reads capture.log.
     func run() throws {
         let line: String
+        var failed = false
         do {
             let result = try runCapture(store: Store(root: options.dataURL), mac: RealMac())
             line = "\(LocalTime.now().iso) \(result.rawValue)"
         } catch {
             line = "\(LocalTime.now().iso) error: \((error as? LocalizedError)?.errorDescription ?? "\(error)")"
+            failed = true
         }
         print(line)
-        appendLog(line)
-    }
-
-    func appendLog(_ line: String) {
-        let url = options.dataURL.appending(path: "capture.log")
-        if !FileManager.default.fileExists(atPath: url.path) { FileManager.default.createFile(atPath: url.path, contents: nil) }
-        guard let handle = try? FileHandle(forWritingTo: url) else { return }
-        defer { try? handle.close() }
-        _ = try? handle.seekToEnd()
-        try? handle.write(contentsOf: Data((line + "\n").utf8))
+        CaptureLog.append(line, to: options.dataURL)
+        if failed { throw ExitCode.failure }
     }
 }
 
@@ -150,6 +145,14 @@ struct Status: ParsableCommand {
         let state = currentRecorder(data: options.dataURL).state
         print("recording: " + (state == .on ? "on" : state == .needsApproval
             ? "waiting for approval in System Settings → Login Items" : "off (start it with: dock-timelapse install)"))
+        if state == .on {
+            switch recorderHealth(dataDir: options.dataURL, now: .now()) {
+            case .healthy: break
+            case .stale(let last):
+                print("warning: nothing recorded since \(last?.iso ?? "it was installed"); try `dock-timelapse install` again")
+            case .failing(let why): print("warning: the last capture failed: \(why)")
+            }
+        }
         print("data:  \(options.data)")
         let snaps: [Snapshot]
         do { snaps = try Store(root: options.dataURL).snapshots() } catch { fail(error) }

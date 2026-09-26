@@ -86,34 +86,51 @@ struct Card<Content: View>: View {
 
 struct RecordingBadge: View {
     let state: RecorderState
+    var health: RecorderHealth = .healthy
+
+    private var working: Bool { state == .on && health == .healthy }
 
     var body: some View {
         HStack(spacing: 6) {
             Circle()
                 .fill(color)
                 .frame(width: 7, height: 7)
-                .shadow(color: color.opacity(0.8), radius: state == .on ? 3 : 0)
-                .symbolEffect(.pulse, isActive: state == .on)
+                .shadow(color: color.opacity(0.8), radius: working ? 3 : 0)
+                .symbolEffect(.pulse, isActive: working)
             Text(text)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+        .help(help)
         .accessibilityElement(children: .combine)
     }
 
     var color: Color {
-        switch state {
-        case .on: .green
-        case .needsApproval: .orange
-        case .off: .secondary
+        switch (state, health) {
+        case (.on, .healthy): .green
+        case (.on, .stale): .orange
+        case (.on, .failing): .red
+        case (.needsApproval, _): .orange
+        case (.off, _): .secondary
         }
     }
 
     var text: String {
-        switch state {
-        case .on: "Recording"
-        case .needsApproval: "Waiting for your OK"
-        case .off: "Paused"
+        switch (state, health) {
+        case (.on, .healthy): "Recording"
+        case (.on, .stale): "Not recording lately"
+        case (.on, .failing): "Recording failed"
+        case (.needsApproval, _): "Waiting for your OK"
+        case (.off, _): "Paused"
+        }
+    }
+
+    var help: String {
+        switch (state, health) {
+        case (.on, .stale(let last)):
+            "Nothing recorded since \(last.map { $0.day.long } ?? "it was turned on"). Restart recording to get it going again."
+        case (.on, .failing(let why)): "The last capture failed: \(why)"
+        default: ""
         }
     }
 }

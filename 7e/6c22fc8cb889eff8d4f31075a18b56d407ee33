@@ -1,0 +1,21 @@
+mac/Sources/DockCore/TimeMachine.swift
+  s_d2c8d5b184db71::t_1a8fb9267d7b48 96-101,148-154
+mac/Tests/DockCoreTests/TimeMachineTests.swift
+  s_d2c8d5b184db71::t_a445c0046e0144 109-128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "7e6c22fc8cb889eff8d4f31075a18b56d407ee33",
+  "prompts": {},
+  "sessions": {
+    "s_d2c8d5b184db71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b48e1a08-ecae-45b3-b53f-7582c1477f10",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "David Boclé <bcldvd@users.noreply.github.com>"
+    }
+  }
+}

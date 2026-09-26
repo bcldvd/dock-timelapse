@@ -1,0 +1,506 @@
+[
+  {
+    "date": "2025-12-30",
+    "captured_at": "2025-12-30T10:00:00",
+    "apps": [
+      {
+        "label": "A",
+        "bundle_id": "a",
+        "path": "/Applications/A.app"
+      },
+      {
+        "label": "B",
+        "bundle_id": "b",
+        "path": "/Applications/B.app"
+      },
+      {
+        "label": "C",
+        "bundle_id": "c",
+        "path": "/Applications/C.app"
+      },
+      {
+        "label": "D",
+        "bundle_id": "d",
+        "path": "/Applications/D.app"
+      },
+      {
+        "label": "E",
+        "bundle_id": "e",
+        "path": "/Applications/E.app"
+      },
+      {
+        "label": "F",
+        "bundle_id": "f",
+        "path": "/Applications/F.app"
+      }
+    ],
+    "changes": [
+      {
+        "kind": "added",
+        "app": {
+          "label": "A",
+          "bundle_id": "a",
+          "path": "/Applications/A.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "added",
+        "app": {
+          "label": "B",
+          "bundle_id": "b",
+          "path": "/Applications/B.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "added",
+        "app": {
+          "label": "C",
+          "bundle_id": "c",
+          "path": "/Applications/C.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "added",
+        "app": {
+          "label": "D",
+          "bundle_id": "d",
+          "path": "/Applications/D.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "added",
+        "app": {
+          "label": "E",
+          "bundle_id": "e",
+          "path": "/Applications/E.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "added",
+        "app": {
+          "label": "F",
+          "bundle_id": "f",
+          "path": "/Applications/F.app"
+        },
+        "old": null
+      }
+    ],
+    "screenshot": null,
+    "icons": {
+      "a": "icons/a.png",
+      "b": "icons/b.png",
+      "c": "icons/c.png",
+      "d": "icons/d.png",
+      "e": "icons/e.png",
+      "f": "icons/f.png"
+    },
+    "wallpaper": "wallpapers/w0.jpg"
+  },
+  {
+    "date": "2026-01-02",
+    "captured_at": "2026-01-02T10:00:00",
+    "apps": [
+      {
+        "label": "A",
+        "bundle_id": "a",
+        "path": "/Applications/A.app"
+      },
+      {
+        "label": "B",
+        "bundle_id": "b",
+        "path": "/Applications/B.app"
+      },
+      {
+        "label": "X",
+        "bundle_id": "x",
+        "path": "/Applications/X.app"
+      },
+      {
+        "label": "C",
+        "bundle_id": "c",
+        "path": "/Applications/C.app"
+      },
+      {
+        "label": "D",
+        "bundle_id": "d",
+        "path": "/Applications/D.app"
+      },
+      {
+        "label": "E",
+        "bundle_id": "e",
+        "path": "/Applications/E.app"
+      },
+      {
+        "label": "F",
+        "bundle_id": "f",
+        "path": "/Applications/F.app"
+      },
+      {
+        "label": "G",
+        "bundle_id": "g",
+        "path": "/Applications/G.app"
+      }
+    ],
+    "changes": [
+      {
+        "kind": "added",
+        "app": {
+          "label": "X",
+          "bundle_id": "x",
+          "path": "/Applications/X.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "added",
+        "app": {
+          "label": "G",
+          "bundle_id": "g",
+          "path": "/Applications/G.app"
+        },
+        "old": null
+      }
+    ],
+    "screenshot": null,
+    "icons": {
+      "a": "icons/a.png",
+      "b": "icons/b.png",
+      "x": "icons/x.png",
+      "c": "icons/c.png",
+      "d": "icons/d.png",
+      "e": "icons/e.png",
+      "f": "icons/f.png",
+      "g": "icons/g.png"
+    },
+    "wallpaper": "wallpapers/w1.jpg"
+  },
+  {
+    "date": "2026-02-11",
+    "captured_at": "2026-02-11T10:00:00",
+    "apps": [
+      {
+        "label": "A",
+        "bundle_id": "a",
+        "path": "/Applications/A.app"
+      },
+      {
+        "label": "X",
+        "bundle_id": "x",
+        "path": "/Applications/X.app"
+      },
+      {
+        "label": "B",
+        "bundle_id": "b",
+        "path": "/Applications/B.app"
+      },
+      {
+        "label": "C",
+        "bundle_id": "c",
+        "path": "/Applications/C.app"
+      },
+      {
+        "label": "D",
+        "bundle_id": "d",
+        "path": "/Applications/D.app"
+      },
+      {
+        "label": "F",
+        "bundle_id": "f",
+        "path": "/Applications/F.app"
+      }
+    ],
+    "changes": [
+      {
+        "kind": "removed",
+        "app": {
+          "label": "E",
+          "bundle_id": "e",
+          "path": "/Applications/E.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "removed",
+        "app": {
+          "label": "G",
+          "bundle_id": "g",
+          "path": "/Applications/G.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "moved",
+        "app": {
+          "label": "X",
+          "bundle_id": "x",
+          "path": "/Applications/X.app"
+        },
+        "old": null
+      }
+    ],
+    "screenshot": null,
+    "icons": {
+      "a": "icons/a.png",
+      "x": "icons/x.png",
+      "b": "icons/b.png",
+      "c": "icons/c.png",
+      "d": "icons/d.png",
+      "f": "icons/f.png"
+    },
+    "wallpaper": "wallpapers/w1.jpg"
+  },
+  {
+    "date": "2026-02-12",
+    "captured_at": "2026-02-12T10:00:00",
+    "apps": [
+      {
+        "label": "A",
+        "bundle_id": "a",
+        "path": "/Applications/A.app"
+      },
+      {
+        "label": "F",
+        "bundle_id": "f",
+        "path": "/Applications/F.app"
+      },
+      {
+        "label": "X",
+        "bundle_id": "x",
+        "path": "/Applications/X.app"
+      },
+      {
+        "label": "B",
+        "bundle_id": "b",
+        "path": "/Applications/B.app"
+      },
+      {
+        "label": "C",
+        "bundle_id": "c",
+        "path": "/Applications/C.app"
+      }
+    ],
+    "changes": [
+      {
+        "kind": "removed",
+        "app": {
+          "label": "D",
+          "bundle_id": "d",
+          "path": "/Applications/D.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "moved",
+        "app": {
+          "label": "F",
+          "bundle_id": "f",
+          "path": "/Applications/F.app"
+        },
+        "old": null
+      }
+    ],
+    "screenshot": null,
+    "icons": {
+      "a": "icons/a.png",
+      "f": "icons/f.png",
+      "x": "icons/x.png",
+      "b": "icons/b.png",
+      "c": "icons/c.png"
+    },
+    "wallpaper": "wallpapers/w2.jpg"
+  },
+  {
+    "date": "2026-06-01",
+    "captured_at": "2026-06-01T10:00:00",
+    "apps": [
+      {
+        "label": "A",
+        "bundle_id": "a",
+        "path": "/Applications/A.app"
+      },
+      {
+        "label": "F",
+        "bundle_id": "f",
+        "path": "/Applications/F.app"
+      },
+      {
+        "label": "X",
+        "bundle_id": "x",
+        "path": "/Applications/X.app"
+      },
+      {
+        "label": "B",
+        "bundle_id": "b",
+        "path": "/Applications/B.app"
+      },
+      {
+        "label": "C",
+        "bundle_id": "c",
+        "path": "/Applications/C.app"
+      },
+      {
+        "label": "G",
+        "bundle_id": "g",
+        "path": "/Applications/G.app"
+      },
+      {
+        "label": "H",
+        "bundle_id": "h",
+        "path": "/Applications/H.app"
+      },
+      {
+        "label": "I",
+        "bundle_id": "i",
+        "path": "/Applications/I.app"
+      },
+      {
+        "label": "J",
+        "bundle_id": "j",
+        "path": "/Applications/J.app"
+      }
+    ],
+    "changes": [
+      {
+        "kind": "added",
+        "app": {
+          "label": "G",
+          "bundle_id": "g",
+          "path": "/Applications/G.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "added",
+        "app": {
+          "label": "H",
+          "bundle_id": "h",
+          "path": "/Applications/H.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "added",
+        "app": {
+          "label": "I",
+          "bundle_id": "i",
+          "path": "/Applications/I.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "added",
+        "app": {
+          "label": "J",
+          "bundle_id": "j",
+          "path": "/Applications/J.app"
+        },
+        "old": null
+      }
+    ],
+    "screenshot": null,
+    "icons": {
+      "a": "icons/a.png",
+      "f": "icons/f.png",
+      "x": "icons/x.png",
+      "b": "icons/b.png",
+      "c": "icons/c.png",
+      "g": "icons/g.png",
+      "h": "icons/h.png",
+      "i": "icons/i.png",
+      "j": "icons/j.png"
+    },
+    "wallpaper": "wallpapers/w2.jpg"
+  },
+  {
+    "date": "2026-06-02",
+    "captured_at": "2026-06-02T10:00:00",
+    "apps": [
+      {
+        "label": "F",
+        "bundle_id": "f",
+        "path": "/Applications/F.app"
+      },
+      {
+        "label": "X",
+        "bundle_id": "x",
+        "path": "/Applications/X.app"
+      }
+    ],
+    "changes": [
+      {
+        "kind": "removed",
+        "app": {
+          "label": "A",
+          "bundle_id": "a",
+          "path": "/Applications/A.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "removed",
+        "app": {
+          "label": "B",
+          "bundle_id": "b",
+          "path": "/Applications/B.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "removed",
+        "app": {
+          "label": "C",
+          "bundle_id": "c",
+          "path": "/Applications/C.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "removed",
+        "app": {
+          "label": "G",
+          "bundle_id": "g",
+          "path": "/Applications/G.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "removed",
+        "app": {
+          "label": "H",
+          "bundle_id": "h",
+          "path": "/Applications/H.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "removed",
+        "app": {
+          "label": "I",
+          "bundle_id": "i",
+          "path": "/Applications/I.app"
+        },
+        "old": null
+      },
+      {
+        "kind": "removed",
+        "app": {
+          "label": "J",
+          "bundle_id": "j",
+          "path": "/Applications/J.app"
+        },
+        "old": null
+      }
+    ],
+    "screenshot": null,
+    "icons": {
+      "f": "icons/f.png",
+      "x": "icons/x.png"
+    },
+    "wallpaper": "wallpapers/w3.jpg"
+  }
+]

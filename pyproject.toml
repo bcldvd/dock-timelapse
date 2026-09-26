@@ -1,6 +1,6 @@
 [project]
 name = "dock-timelapse"
-version = "0.2.0"
+version = "0.3.0"
 description = "Record your macOS Dock over time and render Apple-style timelapse videos of its evolution (CLI + MCP server)."
 readme = "README.md"
 authors = [

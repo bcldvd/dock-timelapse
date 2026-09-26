@@ -20,8 +20,8 @@ DEFAULT_OUT = Path.home() / "Movies/Dock Timelapse"
 INSTRUCTIONS = """\
 dock-timelapse records how the user's macOS Dock evolves (one snapshot per day it changes) and renders
 Apple-style timelapse videos (landscape 1920x1080 and portrait 1080x1920).
-Typical flow: dock_status → install_recording (once) → weeks later render_timelapse.
-If there is no history yet, render_preview shows what the video will look like using an invented past.
+Typical flow: dock_status → install_recording (once) → import_time_machine (real past, if the user has backups)
+→ render_timelapse. Without backups, render_preview shows what the video will look like using an invented past.
 Rendering takes roughly 10-30 s per format at 30 fps. Output files are MP4 paths on the user's Mac: tell the user
 where they are (open one with `open <path>`). render_frame returns a single PNG you can look at directly.
 """
@@ -58,7 +58,7 @@ class DockTools:
         snaps = self._store().snapshots()
         first = snaps[0].day if snaps else None
         return [{"date": s.date, "day": (s.day - first).days + 1, "app_count": len(s.apps),
-                 "apps": [a.label for a in s.apps],
+                 "apps": [a.label for a in s.apps], "source": s.source or "recorded",
                  "changes": [c.describe() for c in s.changes] if k else ["(first snapshot)"]}
                 for k, s in enumerate(snaps)]
 
@@ -97,6 +97,18 @@ class DockTools:
 
         return run_capture(self._store(), self.mac, dt.datetime.now(), screenshots=config.load(self.data)["screenshots"])
 
+    def import_time_machine(self, backups_dir: str | None = None) -> dict:
+        from dock_timelapse.timemachine import TimeMachineError, backups_in, import_backups, list_backups
+
+        try:
+            backups = backups_in(Path(backups_dir).expanduser()) if backups_dir else list_backups()
+            r = import_backups(self._store(), self.mac, backups)
+        except TimeMachineError as e:
+            raise ToolError(str(e)) from None
+        return {"backups": r.backups, "backups_with_dock": r.read, "snapshots_added": r.added,
+                "first": r.first, "last": r.last, "total_snapshots": len(self._store().snapshots()),
+                "note": "Past wallpapers can't be recovered, so imported days use today's wallpaper."}
+
     def _render(self, data: Path, fmt: str, background: str, fps: int, suffix: str) -> list[str]:
         from dock_timelapse.video import render_video
 
@@ -108,8 +120,8 @@ class DockTools:
 
     def render(self, format: str = "both", background: str = "wallpaper", fps: int = 30) -> list[str]:
         if not self._store().snapshots():
-            raise ToolError("No history recorded yet. Start it with install_recording, "
-                            "or call render_preview to show a demo with an invented past.")
+            raise ToolError("No history recorded yet. Start it with install_recording, import the past with "
+                            "import_time_machine, or call render_preview to show a demo with an invented past.")
         return self._render(self.data, format, background, fps, "")
 
     def preview(self, format: str = "both", background: str = "wallpaper", fps: int = 30, seed: int = 7) -> list[str]:
@@ -179,6 +191,13 @@ def build_server(data: Path):
     def capture_now() -> str:
         """Record the Dock right now (normally done hourly by the agent)."""
         return tools.capture_now()
+
+    @server.tool(title="Import from Time Machine", annotations=write)
+    def import_time_machine(backups_dir: str | None = None) -> dict:
+        """Import the user's past Docks from Time Machine backups (one snapshot per day the Dock changed), so
+        render_timelapse shows real history right away. The backup disk must be connected, and the app running
+        this server needs Full Disk Access. backups_dir: optional backups folder to read directly."""
+        return tools.import_time_machine(backups_dir)
 
     @server.tool(title="Render timelapse", annotations=write)
     def render_timelapse(format: Fmt = "both", background: Background = "wallpaper", fps: int = 30,

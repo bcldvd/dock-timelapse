@@ -1,7 +1,7 @@
 import datetime as dt
 
 from dock_timelapse.dockdata import DockApp
-from dock_timelapse.store import Store
+from dock_timelapse.store import Snapshot, Store
 
 
 def apps(*ids):
@@ -81,3 +81,64 @@ def test_done_for_day_requires_check_and_no_pending_screenshot(tmp_path):
     s.attach_screenshot(shot)
     assert s.done_for(D1.date())
     assert not s.done_for(D2.date())
+
+
+def imported(day, *ids):
+    return Snapshot(date=day, captured_at=f"{day}T12:00:00", apps=apps(*ids), source="time-machine")
+
+
+def test_merge_prepends_imported_history_and_recomputes_changes(tmp_path):
+    s = Store(tmp_path)
+    s.observe(apps("a", "cursor"), D1)
+    added = s.merge([imported("2025-06-01", "a", "xcode"), imported("2025-09-01", "a", "vscode")])
+    snaps = s.snapshots()
+    assert added == 2
+    assert [x.date for x in snaps] == ["2025-06-01", "2025-09-01", "2026-01-10"]
+    assert [c.describe() for c in snaps[-1].changes] == ["vscode → cursor"]
+    assert snaps[0].source == "time-machine" and snaps[-1].source is None
+
+
+def test_merge_drops_consecutive_duplicates_keeping_the_earliest(tmp_path):
+    s = Store(tmp_path)
+    s.observe(apps("a", "b"), D1)
+    shot = tmp_path / "x.png"; shot.write_bytes(b"png")
+    s.attach_screenshot(shot)
+    s.merge([imported("2025-12-01", "a", "b")])
+    snaps = s.snapshots()
+    assert [x.date for x in snaps] == ["2025-12-01"]
+    assert snaps[0].screenshot == "shots/2026-01-10.png"
+
+
+def test_merge_live_recording_wins_on_the_same_day(tmp_path):
+    s = Store(tmp_path)
+    s.observe(apps("a", "b"), D1)
+    assert s.merge([imported("2026-01-10", "a")]) == 0
+    assert s.snapshots()[0].source is None and s.snapshots()[0].apps == apps("a", "b")
+
+
+def test_merge_is_idempotent(tmp_path):
+    s = Store(tmp_path)
+    s.observe(apps("a", "b"), D1)
+    batch = [imported("2025-06-01", "a"), imported("2025-09-01", "b")]
+    assert s.merge(batch) == 2
+    assert s.merge([imported("2025-06-01", "a"), imported("2025-09-01", "b")]) == 0
+    assert len(s.snapshots()) == 3
+
+
+def test_concurrent_writers_from_separate_stores_lose_nothing(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    Store(tmp_path).observe(apps("a"), D1)
+    n = 24
+
+    def write(k):
+        s = Store(tmp_path)
+        s.observe(apps("a"), D1 + dt.timedelta(days=k + 1))  # marks the day checked
+        day = (dt.date(2020, 1, 1) + dt.timedelta(days=k)).isoformat()
+        s.merge([Snapshot(day, f"{day}T12:00:00", apps(f"x{k}"), source="time-machine")])
+
+    with ThreadPoolExecutor(8) as pool:
+        list(pool.map(write, range(n)))
+    s = Store(tmp_path)
+    assert all(s.checked_on((D1 + dt.timedelta(days=k + 1)).date()) for k in range(n))
+    assert len(s.snapshots()) == n + 1

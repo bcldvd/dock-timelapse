@@ -1,4 +1,4 @@
-"""dock-timelapse: install | uninstall | capture | status | preview | render | still | mcp"""
+"""dock-timelapse: install | uninstall | capture | import | status | preview | render | still | mcp"""
 
 from __future__ import annotations
 
@@ -58,6 +58,9 @@ def main(argv: list[str] | None = None) -> None:
                    help="also keep a cropped Dock screenshot per change (needs Screen Recording permission)")
     sub.add_parser("uninstall", help="stop recording (keeps your data)")
     sub.add_parser("capture", help="one capture attempt (idempotent; what the agent runs)")
+    p = sub.add_parser("import", help="import your past Docks from Time Machine backups")
+    p.add_argument("--backups", type=Path, help="a backups folder to read instead of asking Time Machine "
+                                                "(e.g. /Volumes/<disk>/Backups.backupdb/<Mac>)")
     sub.add_parser("status", help="show recorded snapshots")
     p = sub.add_parser("preview", help="invent a past from today's Dock and render it (see the video on day one)")
     _render_args(p)
@@ -108,6 +111,21 @@ def main(argv: list[str] | None = None) -> None:
         print(f"{dt.datetime.now():%Y-%m-%d %H:%M} {result}", flush=True)
         return
 
+    if args.cmd == "import":
+        from dock_timelapse.macos import RealMac
+        from dock_timelapse.store import Store
+        from dock_timelapse.timemachine import TimeMachineError, backups_in, import_backups, list_backups
+
+        try:
+            backups = backups_in(args.backups) if args.backups else list_backups()
+            print(f"Reading the Dock from {len(backups)} Time Machine backups…", flush=True)
+            r = import_backups(Store(args.data), RealMac(), backups)
+        except TimeMachineError as e:
+            sys.exit(str(e))
+        print(f"Imported {r.added} snapshots ({r.first} → {r.last}) from {r.read} backups. "
+              "See them with `dock-timelapse status`, then `dock-timelapse render`.")
+        return
+
     if args.cmd == "status":
         from dock_timelapse import agent
         from dock_timelapse.store import Store
@@ -117,7 +135,8 @@ def main(argv: list[str] | None = None) -> None:
         print(f"data:  {args.data}")
         for k, s in enumerate(Store(args.data).snapshots()):
             ch = "first snapshot" if k == 0 else ", ".join(c.describe() for c in s.changes)
-            print(f"{s.date}  {len(s.apps):2d} apps  shot={'yes' if s.screenshot else '-'}  {ch}")
+            tm = "  (Time Machine)" if s.source == "time-machine" else ""
+            print(f"{s.date}  {len(s.apps):2d} apps  shot={'yes' if s.screenshot else '-'}  {ch}{tm}")
         return
 
     if args.cmd == "poc":
@@ -144,8 +163,8 @@ def main(argv: list[str] | None = None) -> None:
             mac = DemoMac(RealMac()) if args.demo else RealMac()
             build_poc(data, mac, seed=args.seed, wallpaper=args.wallpaper)
         elif not (data / "snapshots.json").exists():
-            sys.exit("No history yet. Start recording with `dock-timelapse install`, "
-                     "or try `dock-timelapse preview` to see an invented past.")
+            sys.exit("No history yet. Start recording with `dock-timelapse install`, import your past from "
+                     "Time Machine with `dock-timelapse import`, or try `dock-timelapse preview` to see an invented past.")
         for fmt in fmts:
             render_video(data, fmt, args.out / f"dock-{fmt.name}-{args.background}{suffix}.mp4", args.fps, args.background)
     else:

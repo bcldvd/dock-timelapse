@@ -7,3 +7,8 @@ __pycache__/
 .DS_Store
 demo-data/
 .env
+mac/.build/
+mac/.swiftpm/
+/dist/
+/build/
+mac/build/

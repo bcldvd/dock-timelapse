@@ -76,3 +76,30 @@ public enum Permissions {
 public func runsFromTemporaryLocation(_ bundlePath: String, home: String) -> Bool {
     bundlePath.contains("/AppTranslocation/") || bundlePath.hasPrefix("/Volumes/") || bundlePath.hasPrefix("\(home)/Downloads/")
 }
+
+/// Of the running instances (pid, bundle), those launched from `target`, other than `me`.
+public func occupants(of target: URL, among running: [(pid: pid_t, bundle: URL?)], excluding me: pid_t) -> [pid_t] {
+    let path = target.standardizedFileURL.resolvingSymlinksInPath().path
+    return running.filter { $0.pid != me && $0.bundle?.standardizedFileURL.resolvingSymlinksInPath().path == path }
+        .map(\.pid)
+}
+
+/// Quit other instances of this app running from `target`, so it can be replaced. Waits up to `timeout`
+/// for them to exit, then forces the stragglers.
+@MainActor public func quitInstances(at target: URL, bundleID: String, timeout: TimeInterval = 5) {
+    let apps = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
+    let pids = Set(occupants(of: target, among: apps.map { ($0.processIdentifier, $0.bundleURL) },
+                             excluding: getpid()))
+    let doomed = apps.filter { pids.contains($0.processIdentifier) }
+    guard !doomed.isEmpty else { return }
+    func wait(_ seconds: TimeInterval) {
+        let deadline = Date().addingTimeInterval(seconds)
+        while Date() < deadline && doomed.contains(where: { !$0.isTerminated }) {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+    }
+    doomed.forEach { $0.terminate() }
+    wait(timeout)
+    doomed.filter { !$0.isTerminated }.forEach { $0.forceTerminate() }
+    wait(1)
+}

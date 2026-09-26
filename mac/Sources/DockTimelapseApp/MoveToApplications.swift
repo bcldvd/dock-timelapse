@@ -35,8 +35,8 @@ enum MoveToApplications {
         }
     }
 
-    /// Copy into /Applications (or ~/Applications without admin rights); an older copy goes to the Trash.
-    static func move() throws -> URL {
+    /// Copy into /Applications (or ~/Applications without admin rights); an older copy is quit and goes to the Trash.
+    @MainActor static func move() throws -> URL {
         let fm = FileManager.default
         let source = Bundle.main.bundleURL
         let candidates = [URL(fileURLWithPath: "/Applications"),
@@ -46,7 +46,10 @@ enum MoveToApplications {
             do {
                 try fm.createDirectory(at: dir, withIntermediateDirectories: true)
                 let target = dir.appending(path: source.lastPathComponent)
-                if fm.fileExists(atPath: target.path) { try fm.trashItem(at: target, resultingItemURL: nil) }
+                if fm.fileExists(atPath: target.path) {
+                    if let id = Bundle.main.bundleIdentifier { quitInstances(at: target, bundleID: id) }
+                    try fm.trashItem(at: target, resultingItemURL: nil)
+                }
                 try fm.copyItem(at: source, to: target)
                 // Out of Downloads, the original copy is just clutter.
                 if source.path.hasPrefix(fm.homeDirectoryForCurrentUser.path + "/Downloads/") {

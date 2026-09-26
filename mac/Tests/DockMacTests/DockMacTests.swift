@@ -83,3 +83,14 @@ func fakeRunner(_ status: Int32, _ out: String, _ err: String = "") -> (String, 
         #expect(!runsFromTemporaryLocation(path, home: home), "\(path)")
     }
 }
+
+@Test func findsOtherCopiesRunningFromTheMoveTarget() {
+    let target = URL(fileURLWithPath: "/Applications/Dock Timelapse.app")
+    let running: [(pid: pid_t, bundle: URL?)] = [
+        (10, URL(fileURLWithPath: "/Applications/Dock Timelapse.app/")),  // the old copy: quit it
+        (11, URL(fileURLWithPath: "/Volumes/Dock Timelapse/Dock Timelapse.app")),  // another copy elsewhere
+        (12, nil),
+        (99, target),  // ourselves
+    ]
+    #expect(occupants(of: target, among: running, excluding: 99) == [10])
+}

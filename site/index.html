@@ -249,7 +249,7 @@
         </li>
         <li>
           <h3>Render the story</h3>
-          <p>Run <code>dock-timelapse render</code> whenever you like. Want a first look today? <code>preview</code> invents a past that ends with your real Dock.</p>
+          <p>Run <code>dock-timelapse render</code> whenever you like. Using Time Machine? <code>import</code> pulls your real past from your backups, so the first video already covers months. No backups? <code>preview</code> invents a past that ends with your real Dock.</p>
         </li>
       </ol>
     </div>
@@ -306,7 +306,8 @@ args = ["dock-timelapse", "mcp"]</pre><button class="copy">Copy</button></div>
         <div class="code"><pre>uv tool install dock-timelapse
 
 dock-timelapse install   <span class="c"># start recording</span>
-dock-timelapse preview   <span class="c"># your video today, with an invented past</span>
+dock-timelapse import    <span class="c"># your real past, from Time Machine backups</span>
+dock-timelapse preview   <span class="c"># or your video today, with an invented past</span>
 dock-timelapse render    <span class="c"># the real timelapse, in ~/Movies/Dock Timelapse</span></pre><button class="copy">Copy</button></div>
         <p>Add <code>--format portrait</code>, <code>--background white</code> or <code>--screenshots</code> to
           tailor it. <code>dock-timelapse status</code> lists every change it has recorded.</p>

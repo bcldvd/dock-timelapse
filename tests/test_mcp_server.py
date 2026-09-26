@@ -30,7 +30,7 @@ def test_server_lists_expected_tools(tmp_path):
     server = build_server(tmp_path)
     names = {t.name for t in asyncio.run(server.list_tools())}
     assert names == {"dock_status", "current_dock", "dock_history", "install_recording", "uninstall_recording",
-                     "capture_now", "render_timelapse", "render_preview", "render_frame"}
+                     "capture_now", "import_time_machine", "render_timelapse", "render_preview", "render_frame"}
 
 
 def test_tool_errors_reach_the_agent_with_their_message(tmp_path):

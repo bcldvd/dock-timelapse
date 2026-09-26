@@ -28,7 +28,9 @@ a day counter ticking, all drawn over your own wallpaper.
 - **Renders** — the videos are redrawn from that data: a glass Dock over your blurred wallpaper, spring
   animations, change labels (`+ Linear`, `Cursor replaces Xcode`), the date and day counter, and a
   progress bar scaled to real calendar time.
-- **Previews on day one** — `preview` invents a plausible past that ends with your real Dock, so you can
+- **Imports your past** — if you use Time Machine, `import` reads the Dock from each of your backups and
+  adds a snapshot for every day it changed, so your first video already covers months of real history.
+- **Previews on day one** — no backups? `preview` invents a plausible past that ends with your real Dock, so you can
   see your video right away.
 
 Requirements: macOS and [uv](https://docs.astral.sh/uv/). ffmpeg comes bundled.
@@ -41,7 +43,8 @@ Requirements: macOS and [uv](https://docs.astral.sh/uv/). ffmpeg comes bundled.
 uv tool install dock-timelapse
 
 dock-timelapse install        # start recording (hourly agent, one snapshot per day of change)
-dock-timelapse preview        # see your video now, with an invented past
+dock-timelapse import         # add your real past from Time Machine backups (if you have them)
+dock-timelapse preview        # or see your video now, with an invented past
 dock-timelapse render         # later: the real timelapse → ~/Movies/Dock Timelapse/
 ```
 
@@ -85,7 +88,7 @@ args = ["dock-timelapse", "mcp"]
 ```
 
 Tools: `dock_status`, `current_dock`, `dock_history`, `install_recording`, `uninstall_recording`,
-`capture_now`, `render_timelapse`, `render_preview`, `render_frame`.
+`capture_now`, `import_time_machine`, `render_timelapse`, `render_preview`, `render_frame`.
 
 ## Usage
 
@@ -93,11 +96,19 @@ Tools: `dock_status`, `current_dock`, `dock_history`, `install_recording`, `unin
 dock-timelapse status                                     # recording state + every snapshot and its changes
 dock-timelapse render --format portrait                   # landscape | portrait | both (default)
 dock-timelapse render --background white                  # wallpaper (default) | desktop (sharp) | white
+dock-timelapse import --backups "/Volumes/Backup/Backups.backupdb/My Mac"  # read a backups folder directly
 dock-timelapse preview --demo                             # a generic demo Dock
 dock-timelapse still --t 2 5.5                            # single PNG frames
 dock-timelapse install --screenshots                      # also keep Dock screenshots
 dock-timelapse uninstall                                  # stop recording, history stays
 ```
+
+`import` asks Time Machine for this Mac's backups, so connect the backup disk first. Reading backups
+needs Full Disk Access for your terminal app (System Settings → Privacy & Security → Full Disk Access).
+Backups thin out over time (hourly for a day, daily for a month, then weekly), so older changes land on
+the date of the first backup that shows them. Past wallpapers can't be recovered: imported days use
+today's. An app you have since deleted gets its icon from the copy inside the backup. Running `import`
+again is safe; it never overwrites what the agent recorded live.
 
 Screenshots use the Screen Recording permission: `install --screenshots` prints the Python path to add in
 System Settings → Privacy & Security → Screen & System Audio Recording. The videos only need the Dock data,
@@ -122,6 +133,7 @@ uv run pytest
 | `agent.py` | the launchd agent |
 | `timeline.py` · `layout.py` | pure animation model and geometry |
 | `render.py` · `video.py` | Pillow frames → ffmpeg H.264 |
+| `timemachine.py` | import past Docks from Time Machine backups |
 | `poc.py` | invented histories for previews |
 | `mcp_server.py` | MCP tools |
 

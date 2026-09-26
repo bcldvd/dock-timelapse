@@ -31,3 +31,34 @@ def test_status_marks_the_first_snapshot(tmp_path, capsys):
     main(["--data", str(tmp_path), "status"])
     line = capsys.readouterr().out.strip().splitlines()[-1]
     assert line.endswith("first snapshot") and line.count("apps") == 1
+
+
+def test_import_from_a_backups_folder_then_status_labels_it(tmp_path, capsys, monkeypatch):
+    from pathlib import Path
+
+    import dock_timelapse.timemachine as tm
+    from tests.test_timemachine import make_backup
+
+    make_backup(tmp_path / "tm", "2025-06-01-090000.backup", ["Arc"], volume="Data")
+    make_backup(tmp_path / "tm", "2025-08-01-090000.backup", ["Arc", "Slack"], volume="Data")
+    real = tm.import_backups
+    monkeypatch.setattr(tm, "import_backups",
+                        lambda store, mac, backups: real(store, _NoMac(), backups, home=Path("/Users/me")))
+    main(["--data", str(tmp_path / "d"), "import", "--backups", str(tmp_path / "tm")])
+    assert "Imported 2 snapshots (2025-06-01 → 2025-08-01)" in capsys.readouterr().out
+    main(["--data", str(tmp_path / "d"), "status"])
+    assert capsys.readouterr().out.strip().splitlines()[-1].endswith("+ Slack  (Time Machine)")
+
+
+def test_import_with_no_backups_explains(tmp_path):
+    (tmp_path / "empty").mkdir()
+    with pytest.raises(SystemExit, match="No Time Machine backups in"):
+        main(["--data", str(tmp_path / "d"), "import", "--backups", str(tmp_path / "empty")])
+
+
+class _NoMac:
+    def icon_png(self, app):
+        return None
+
+    def wallpaper(self):
+        return None

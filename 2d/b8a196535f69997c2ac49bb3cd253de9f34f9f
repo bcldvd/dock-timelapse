@@ -1,0 +1,21 @@
+mac/Tests/DockRenderTests/VideoTests.swift
+  s_d2c8d5b184db71::t_81a4318e61d66c 46-64
+mac/Sources/DockRender/Video.swift
+  s_d2c8d5b184db71::t_5773bc64c15911 141,143-147,151-153
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "2db8a196535f69997c2ac49bb3cd253de9f34f9f",
+  "prompts": {},
+  "sessions": {
+    "s_d2c8d5b184db71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b48e1a08-ecae-45b3-b53f-7582c1477f10",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "David Boclé <bcldvd@users.noreply.github.com>"
+    }
+  }
+}

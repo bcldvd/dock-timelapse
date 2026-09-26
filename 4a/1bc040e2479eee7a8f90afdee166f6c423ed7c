@@ -1,0 +1,19 @@
+mac/scripts/make-dmg.sh
+  s_d2c8d5b184db71::t_a09eeea38cf3d4 22,37-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "4a1bc040e2479eee7a8f90afdee166f6c423ed7c",
+  "prompts": {},
+  "sessions": {
+    "s_d2c8d5b184db71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b48e1a08-ecae-45b3-b53f-7582c1477f10",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "David Boclé <bcldvd@users.noreply.github.com>"
+    }
+  }
+}

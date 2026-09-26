@@ -18,10 +18,8 @@ SIGN="${SIGN:-$(codesign -dvv "$APP" 2>&1 | sed -n 's/^Authority=//p' | head -1 
 notarize() {  # $1 = file to submit
   if [ -n "${NOTARY_PROFILE:-}" ]; then
     xcrun notarytool submit "$1" --keychain-profile "$NOTARY_PROFILE" --wait
-  elif [ -n "${NOTARY_KEY:-}" ]; then
-    xcrun notarytool submit "$1" --key "$NOTARY_KEY" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER" --wait
   else
-    return 1
+    xcrun notarytool submit "$1" --key "$NOTARY_KEY" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER" --wait
   fi
 }
 
@@ -36,7 +34,9 @@ if [ -n "$SIGN" ] && [ "$SIGN" != "-" ]; then
   codesign --force --sign "$SIGN" "$DMG"
 fi
 
-if notarize "$DMG"; then
+# With credentials, a notarization or stapling failure fails the build (set -e).
+if [ -n "${NOTARY_PROFILE:-}" ] || [ -n "${NOTARY_KEY:-}" ]; then
+  notarize "$DMG"
   xcrun stapler staple "$DMG"
   echo "Notarized and stapled."
 else

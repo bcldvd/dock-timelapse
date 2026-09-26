@@ -16,14 +16,16 @@ let package = Package(
         .target(name: "DockMac", dependencies: ["DockCore"]),
         .target(name: "DockRender", dependencies: ["DockCore"]),
         .executableTarget(name: "DockTimelapseCLI", dependencies: [
-            "DockCore", "DockMac", "DockRender",
+            "DockCore", "DockMac", "DockRender", "DockMCP",
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
         ]),
+        .target(name: "DockMCP", dependencies: ["DockCore", "DockMac", "DockRender"]),
         .target(name: "DockAppModel", dependencies: ["DockCore", "DockMac", "DockRender"]),
         .executableTarget(name: "DockTimelapseApp", dependencies: ["DockAppModel", "DockCore", "DockMac", "DockRender"]),
         .testTarget(name: "DockCoreTests", dependencies: ["DockCore"]),
         .testTarget(name: "DockMacTests", dependencies: ["DockMac"]),
         .testTarget(name: "DockRenderTests", dependencies: ["DockRender"]),
         .testTarget(name: "DockAppModelTests", dependencies: ["DockAppModel"]),
+        .testTarget(name: "DockMCPTests", dependencies: ["DockMCP"]),
     ]
 )

@@ -71,3 +71,8 @@ public enum Permissions {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!)
     }
 }
+
+/// Is the app running from somewhere it can't stay: a translocated copy, a mounted DMG, or Downloads?
+public func runsFromTemporaryLocation(_ bundlePath: String, home: String) -> Bool {
+    bundlePath.contains("/AppTranslocation/") || bundlePath.hasPrefix("/Volumes/") || bundlePath.hasPrefix("\(home)/Downloads/")
+}

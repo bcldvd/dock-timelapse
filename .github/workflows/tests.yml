@@ -10,3 +10,12 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uv sync
       - run: uv run pytest -q
+  swift:
+    # The native app and engine: unit, oracle-parity, golden-frame and encoder tests, then a full app build.
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - run: xcodebuild -version && swift --version
+      - run: swift test
+        working-directory: mac
+      - run: SIGN=- mac/scripts/build-app.sh

@@ -1,5 +1,6 @@
 import ArgumentParser
 import DockCore
+import DockMCP
 import DockMac
 import DockRender
 import Foundation
@@ -66,7 +67,7 @@ struct DockTimelapse: AsyncParsableCommand {
         abstract: "Record your macOS Dock over time and render timelapse videos of it.",
         version: "0.3.0",
         subcommands: [Install.self, Uninstall.self, Capture.self, Import.self, Status.self, Preview.self,
-                      Render.self, Still.self]
+                      Render.self, Still.self, MCP.self]
     )
 }
 
@@ -239,5 +240,14 @@ struct Still: ParsableCommand {
                 catch { fail(error) }
             }
         }
+    }
+}
+
+struct MCP: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(commandName: "mcp", abstract: "Run the MCP server (stdio) for AI agents.")
+    @OptionGroup var options: Options
+
+    func run() async throws {
+        await MCPServer(tools: DockTools(data: options.dataURL)).run()
     }
 }

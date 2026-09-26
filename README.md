@@ -37,6 +37,14 @@ Requirements: macOS and [uv](https://docs.astral.sh/uv/). ffmpeg comes bundled.
 
 ## Install
 
+### Mac app (recommended)
+
+Download **Dock Timelapse.dmg** from the [latest release](https://github.com/bcldvd/dock-timelapse/releases/latest),
+open it and drag **Dock Timelapse** to Applications. It lives in your menu bar: a short welcome starts
+recording, offers to bring back your past from Time Machine, and makes your first video. Nothing else to
+install (macOS 26 or later). The app also carries the `dock-timelapse` command and the MCP server, and
+picks up any history recorded by the command-line version.
+
 ### Command line
 
 ```bash
@@ -118,6 +126,28 @@ Data lives in `~/Library/Application Support/dock-timelapse/` (`snapshots.json`,
 `capture.log`).
 
 ## Development
+
+The Mac app and its engine live in `mac/` (Swift package, macOS 26+, Xcode 26+):
+
+```bash
+cd mac
+swift test                    # unit, parity, golden-frame and encoder tests
+scripts/build-app.sh          # → build/Dock Timelapse.app (signed with your Apple Development identity)
+scripts/make-dmg.sh           # → build/Dock-Timelapse-<version>.dmg (notarized when NOTARY_* is set)
+open "build/Dock Timelapse.app" --args --demo --welcome   # UI review without touching login items
+```
+
+| target | role |
+|---|---|
+| `DockCore` | Dock parsing, diff, store, timeline, layout, Time Machine import, previews |
+| `DockMac` | Dock prefs, icons, wallpaper, `tmutil`, Full Disk Access, background recording |
+| `DockRender` | Core Graphics frames, AVFoundation H.264 |
+| `DockMCP` | MCP server (stdio) |
+| `DockAppModel` · `DockTimelapseApp` | app logic (tested) · SwiftUI |
+| `DockTimelapseCLI` | `dock-timelapse` |
+
+The Python engine below is the reference the Swift port is tested against:
+`uv run python scripts/gen_swift_fixtures.py` regenerates the parity fixtures.
 
 ```bash
 uv sync

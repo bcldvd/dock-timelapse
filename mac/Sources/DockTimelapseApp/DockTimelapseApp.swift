@@ -121,6 +121,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         let args = CommandLine.arguments
+        if !args.contains("--demo") { MoveToApplications.offerIfNeeded() }
         if let i = args.firstIndex(of: "--selftest-recorder"), i + 1 < args.count {
             RecorderSelfTest.run(report: URL(fileURLWithPath: args[i + 1]))
         }

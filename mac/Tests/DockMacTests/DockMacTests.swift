@@ -71,3 +71,15 @@ func fakeRunner(_ status: Int32, _ out: String, _ err: String = "") -> (String, 
     #expect(image.pixelsWide == 512 && image.pixelsHigh == 512)
     #expect(RealMac().iconPNG(for: DockApp(label: "Gone", bundleID: "x", path: "/Applications/Nope-\(UUID()).app")) == nil)
 }
+
+@Test func detectsTemporaryAppLocations() {
+    let home = "/Users/me"
+    for path in ["/private/var/folders/x/AppTranslocation/ABC/d/Dock Timelapse.app", "/Volumes/Dock Timelapse/Dock Timelapse.app",
+                 "/Users/me/Downloads/Dock Timelapse.app"] {
+        #expect(runsFromTemporaryLocation(path, home: home), "\(path)")
+    }
+    for path in ["/Applications/Dock Timelapse.app", "/Users/me/Applications/Dock Timelapse.app",
+                 "/Users/me/Work/mac/build/Dock Timelapse.app"] {
+        #expect(!runsFromTemporaryLocation(path, home: home), "\(path)")
+    }
+}

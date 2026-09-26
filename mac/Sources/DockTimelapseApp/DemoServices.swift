@@ -5,6 +5,7 @@ import Foundation
 
 /// In-memory stand-ins for the system, for screenshots and UI testing (`--demo`).
 ///   --demo-recorder on|off|approval   --demo-fda yes|no   --demo-tm none|ok|missing
+///   --demo-guide fda|recording (show the System Settings guide)
 enum DemoServices {
     final class MemoryRecorder: Recorder, @unchecked Sendable {
         var state: RecorderState
@@ -25,13 +26,21 @@ enum DemoServices {
         case "approval": .needsApproval
         default: .off
         }
-        s.recorder = MemoryRecorder(recorder)
-        let fda = value(args, "--demo-fda", "yes") == "yes"
-        let fdaGranted = Box(fda)
-        s.hasFullDiskAccess = {
-            // Simulate the user granting access a few seconds after being asked.
-            if !fdaGranted.value { DispatchQueue.main.asyncAfter(deadline: .now() + 4) { fdaGranted.value = true } }
-            return fdaGranted.value
+        let memory = MemoryRecorder(recorder)
+        s.recorder = memory
+        let fdaGranted = Box(value(args, "--demo-fda", "yes") == "yes")
+        s.hasFullDiskAccess = { fdaGranted.value }
+        // The real System Settings pane opens (so the guide can be seen beside it); the user "flips the
+        // switch" a few seconds later.
+        let live = AppServices.live().openSettings
+        s.openSettings = { permission in
+            live(permission)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                switch permission {
+                case .fullDiskAccess: fdaGranted.value = true
+                case .backgroundRecording: memory.state = .on
+                }
+            }
         }
         let tm = value(args, "--demo-tm", "ok")
         s.timeMachineConfigured = { tm != "none" }
@@ -67,6 +76,11 @@ extension AppModel {
         case "imported": importState = .finished(ImportResult(backups: 52, read: 52, added: 9, first: "2024-03-02", last: "2026-08-30"))
         case "import-failed": importState = .failed(.noTimeMachineBackups(detail: nil))
         case "make-video": makeVideo()
+        default: break
+        }
+        switch DemoServices.value(args, "--demo-guide", "") {
+        case "fda": PermissionGuide.request(.fullDiskAccess, model: self)
+        case "recording": PermissionGuide.request(.backgroundRecording, model: self)
         default: break
         }
     }

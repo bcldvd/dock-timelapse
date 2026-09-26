@@ -19,6 +19,8 @@ public struct AppServices: Sendable {
     public var render: @Sendable (_ data: URL, _ format: VideoFormat, _ out: URL, _ fps: Int, _ background: Background,
                                   _ progress: @escaping RenderProgress) async throws -> URL
     public var now: @Sendable () -> LocalTime
+    /// Show the System Settings pane where a permission is granted.
+    public var openSettings: @MainActor @Sendable (Permission) -> Void = { _ in }
 
     public init(dataDir: URL, outputDir: URL, mac: MacSystem, recorder: Recorder,
                 listBackups: @escaping @Sendable () throws -> [Backup],
@@ -41,7 +43,7 @@ public struct AppServices: Sendable {
 
     /// The real thing.
     public static func live() -> AppServices {
-        AppServices(
+        var s = AppServices(
             dataDir: Paths.defaultData,
             outputDir: Paths.defaultOutput,
             mac: RealMac(),
@@ -60,5 +62,12 @@ public struct AppServices: Sendable {
                                       progress: progress)
             }
         )
+        s.openSettings = { permission in
+            switch permission {
+            case .backgroundRecording: AppRecorder.openLoginItemsSettings()
+            case .fullDiskAccess: Permissions.openFullDiskAccessSettings()
+            }
+        }
+        return s
     }
 }

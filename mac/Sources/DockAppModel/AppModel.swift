@@ -75,6 +75,7 @@ public final class AppModel {
     /// Whether the job, when on, is actually capturing.
     public private(set) var recorderHealth: RecorderHealth = .healthy
     public private(set) var timeMachineConfigured = false
+    public private(set) var fullDiskAccess = false
     public private(set) var legacyRecorderFound = false
     public private(set) var historyError: DockError?
     public private(set) var recorderError: DockError?
@@ -116,6 +117,7 @@ public final class AppModel {
         recorder = services.recorder.state
         recorderHealth = recorder == .on ? DockCore.recorderHealth(dataDir: services.dataDir, now: services.now()) : .healthy
         timeMachineConfigured = services.timeMachineConfigured()
+        fullDiskAccess = services.hasFullDiskAccess()
         legacyRecorderFound = services.legacyRecorderInstalled()
     }
 

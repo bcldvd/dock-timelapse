@@ -10,7 +10,7 @@ open -n "$APP" --args --demo "$@"
 sleep 2
 open -a "$APP"  # bring it to the front so windows render as active
 sleep "${WAIT:-3}"
-PID=$(pgrep -f "Dock Timelapse.app/Contents/MacOS/Dock Timelapse" | head -1)
+PID=$(pgrep -nf "Dock Timelapse.app/Contents/MacOS/Dock Timelapse")
 IDS=$("$(cd "$(dirname "$0")/../.." && pwd)/.venv/bin/python" - "$PID" <<'PY'
 import sys, Quartz
 pid = int(sys.argv[1])
@@ -22,6 +22,6 @@ PY
 )
 n=0
 for id in $IDS; do
-  screencapture -x -o -l "$id" "$OUT/$NAME-$n.png"; n=$((n+1))
+  screencapture -x -o -l "$id" "$OUT/$NAME-$n.png" 2>/dev/null && n=$((n+1)) || true  # skip windows with nothing drawn
 done
 echo "$n window(s) → $OUT/$NAME-*.png"

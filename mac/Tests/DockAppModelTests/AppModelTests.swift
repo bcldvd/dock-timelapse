@@ -49,12 +49,14 @@ final class Harness {
     let renders = Box<[String]>([])
     let renderGate = Box<Bool>(false)  // true = renders hang until cancelled
     let renderFails = Box<Bool>(false)
+    let settingsOpened = Box<[Permission]>([])
     let model: AppModel
 
     init() {
         dir = FileManager.default.temporaryDirectory.appending(path: "app-tests-\(UUID())")
         let (dock, fda, backups, renders, gate, fails) = (dock, fda, backups, renders, renderGate, renderFails)
-        let services = AppServices(
+        let opened = settingsOpened
+        var services = AppServices(
             dataDir: dir.appending(path: "data"), outputDir: dir.appending(path: "out"),
             mac: FakeMac(dock: dock), recorder: recorder,
             listBackups: { try backups.value.get() },
@@ -70,6 +72,7 @@ final class Harness {
             },
             now: { LocalTime(Day(2026, 9, 26), 12) }
         )
+        services.openSettings = { opened.value.append($0) }
         model = AppModel(services: services, defaults: UserDefaults(suiteName: "tests-\(UUID())")!)
     }
 
@@ -258,5 +261,77 @@ func apps(_ ids: [String]) -> [DockApp] { ids.map { apps($0)[0] } }
         h.model.stopRecording()
         #expect(h.model.recorderError == .backgroundRecording("launchd said no"))
         #expect(h.model.recorder == .on)
+    }
+}
+
+@MainActor @Suite struct PermissionTests {
+    func row(_ h: Harness, _ p: Permission) -> PermissionRow { h.model.permissions.first { $0.permission == p }! }
+
+    @Test func recordingIsRequiredAndAccessIsOptional() {
+        let h = Harness()
+        h.fda.value = false
+        h.model.refresh()
+        #expect(h.model.permissions.map(\.permission) == [.backgroundRecording, .fullDiskAccess])
+        #expect(row(h, .backgroundRecording) == PermissionRow(permission: .backgroundRecording, status: .notYet, required: true))
+        #expect(row(h, .fullDiskAccess) == PermissionRow(permission: .fullDiskAccess, status: .notYet, required: false))
+        #expect(!h.model.requiredPermissionsGranted)
+    }
+
+    @Test func statusFollowsTheSystem() {
+        let h = Harness()
+        h.recorder.state = .needsApproval
+        h.model.refresh()
+        #expect(row(h, .backgroundRecording).status == .waitingForApproval)
+        #expect(row(h, .fullDiskAccess).status == .granted)
+        h.recorder.state = .on
+        h.model.refresh()
+        #expect(row(h, .backgroundRecording).status == .granted && h.model.requiredPermissionsGranted)
+    }
+
+    @Test func turningOnRecordingStartsTheJobWithoutOpeningSettings() {
+        let h = Harness()
+        h.model.requestPermission(.backgroundRecording)
+        #expect(h.recorder.starts == 1 && h.model.recorder == .on)
+        #expect(h.settingsOpened.value.isEmpty)
+    }
+
+    @Test func recordingAwaitingApprovalOpensLoginItems() {
+        let h = Harness()
+        h.recorder.state = .needsApproval
+        h.model.refresh()
+        h.model.requestPermission(.backgroundRecording)
+        #expect(h.settingsOpened.value == [.backgroundRecording] && h.recorder.starts == 0)
+    }
+
+    @Test func fullDiskAccessOpensPrivacySettings() {
+        let h = Harness()
+        h.fda.value = false
+        h.model.refresh()
+        h.model.requestPermission(.fullDiskAccess)
+        #expect(h.settingsOpened.value == [.fullDiskAccess])
+    }
+
+    @Test func grantedPermissionsDoNothing() {
+        let h = Harness()
+        h.recorder.state = .on
+        h.model.refresh()
+        h.model.requestPermission(.backgroundRecording)
+        h.model.requestPermission(.fullDiskAccess)
+        #expect(h.settingsOpened.value.isEmpty && h.recorder.starts == 0)
+    }
+
+    /// macOS sends no notification when a switch is flipped in System Settings: the model polls while a
+    /// permission screen is visible and stops once everything is granted.
+    @Test func watchingNoticesGrantsAndStops() async {
+        let h = Harness()
+        h.fda.value = false
+        h.recorder.state = .needsApproval
+        h.model.refresh()
+        let watch = Task { await h.model.watchPermissions(every: .milliseconds(5)) }
+        h.fda.value = true
+        h.recorder.state = .on
+        await h.waitFor { h.model.permissions.allSatisfy { $0.status == .granted } }
+        #expect(h.model.permissions.allSatisfy { $0.status == .granted })
+        await watch.value  // returns by itself once everything is granted
     }
 }

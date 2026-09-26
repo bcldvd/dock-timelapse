@@ -48,7 +48,7 @@ struct MenuPanel: View {
             }
             Spacer()
             if model.recorder == .needsApproval {
-                Button("Allow…") { AppRecorder.openLoginItemsSettings() }
+                Button("Allow…") { PermissionGuide.request(.backgroundRecording, model: model) }
                     .buttonStyle(.glass)
                     .controlSize(.small)
             } else if model.recorder == .on && model.recorderHealth != .healthy {
@@ -193,12 +193,12 @@ struct MenuPanel: View {
             Card(tint: .orange.opacity(0.2)) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Allow access to your backups").font(.callout.weight(.semibold))
-                    Text("Turn on Dock Timelapse under Full Disk Access. The import continues by itself once it's on.")
+                    Text("Dock Timelapse needs Full Disk Access to read your backups. The import continues by itself once it's on.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                     HStack {
-                        Button("Open Privacy Settings") { Permissions.openFullDiskAccessSettings() }
+                        Button("Allow Access") { PermissionGuide.request(.fullDiskAccess, model: model) }
                             .buttonStyle(.glassProminent)
                         Spacer()
                         ProgressView().controlSize(.small)
@@ -227,7 +227,7 @@ struct MenuPanel: View {
         case .failed(let error):
             errorCard(error, dismiss: { model.dismissImport() }) {
                 if error.recovery == .connectBackupDisk { Task { await model.importFromTimeMachine() } }
-                else if error.recovery == .openFullDiskAccessSettings { Permissions.openFullDiskAccessSettings() }
+                else if error.recovery == .openFullDiskAccessSettings { PermissionGuide.request(.fullDiskAccess, model: model) }
             }
         }
     }
@@ -249,8 +249,8 @@ struct MenuPanel: View {
                     Button(recovery.title) {
                         if let action { action(); return }
                         switch recovery {
-                        case .openFullDiskAccessSettings: Permissions.openFullDiskAccessSettings()
-                        case .openLoginItemsSettings: AppRecorder.openLoginItemsSettings()
+                        case .openFullDiskAccessSettings: PermissionGuide.request(.fullDiskAccess, model: model)
+                        case .openLoginItemsSettings: PermissionGuide.request(.backgroundRecording, model: model)
                         case .startRecording: model.startRecording()
                         case .connectBackupDisk: break
                         }

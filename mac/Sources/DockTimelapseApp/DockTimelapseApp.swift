@@ -16,6 +16,10 @@ struct DockTimelapseApp: App {
         var s = args.contains("--demo") ? DemoServices.make(args) : AppServices.live()
         if let i = args.firstIndex(of: "--demo-data"), i + 1 < args.count {
             s.dataDir = URL(fileURLWithPath: args[i + 1])
+            if args.contains("--demo") {  // demo mode works on a copy: its folder is often a test fixture
+                let copy = FileManager.default.temporaryDirectory.appending(path: "dock-timelapse-demo-\(UUID().uuidString)")
+                if (try? FileManager.default.copyItem(at: s.dataDir, to: copy)) != nil { s.dataDir = copy }
+            }
         }
         if let i = args.firstIndex(of: "--output"), i + 1 < args.count {
             s.outputDir = URL(fileURLWithPath: args[i + 1])
@@ -30,10 +34,12 @@ struct DockTimelapseApp: App {
             MenuBarIcon(rendering: model.render.isRendering, showWelcome: !model.onboarded || CommandLine.arguments.contains("--welcome"))
                 .task {
                     if CommandLine.arguments.contains("--demo") {
+                        // Demo mode shows states; it never records (its data folder is often a test fixture).
                         model.refresh()
                         model.applyDemoState(CommandLine.arguments)
+                    } else {
+                        await keepRecordingFresh()
                     }
-                    await keepRecordingFresh()
                 }
         }
         .menuBarExtraStyle(.window)

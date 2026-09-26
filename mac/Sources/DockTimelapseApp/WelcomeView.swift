@@ -131,48 +131,22 @@ struct WelcomeView: View {
     }
 
     private var record: some View {
-        VStack(spacing: 30) {
+        VStack(spacing: 24) {
             Spacer(minLength: 0)
-            Image(systemName: "record.circle")
-                .font(.system(size: 64, weight: .light))
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(.red)
-            title("Start recording",
-                  "Once an hour, Dock Timelapse checks which apps are in your Dock and keeps a note on the days something changes. Everything stays on this Mac.")
+            title("Two quick permissions",
+                  "One to record, and one more if you'd like your past back. Everything stays on this Mac.")
+            PermissionCards().frame(maxWidth: 580)
             if model.legacyRecorderFound, let since = model.stats.since {
                 Label("Your recording since \(since.long) carries over.", systemImage: "checkmark.circle.fill")
                     .font(.callout)
                     .foregroundStyle(.white.opacity(0.85))
             }
-            switch model.recorder {
-            case .on:
-                Label("Recording", systemImage: "checkmark.circle.fill")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.green)
-                    .task {
-                        try? await Task.sleep(for: .milliseconds(700))
-                        go(.past)
-                    }
-            case .needsApproval:
-                VStack(spacing: 12) {
-                    Text("One more click: allow Dock Timelapse in Login Items.")
-                        .font(.callout)
-                    primary("Open Login Items", systemImage: "gearshape") { AppRecorder.openLoginItemsSettings() }
-                }
-                .task {  // macOS doesn't tell us; check until the switch is on
-                    while !Task.isCancelled && model.recorder != .on {
-                        try? await Task.sleep(for: .seconds(1))
-                        model.refresh()
-                    }
-                }
-            case .off:
-                VStack(spacing: 12) {
-                    primary("Start Recording", systemImage: "record.circle") { model.startRecording() }
-                    if let error = model.recorderError {
-                        Text(error.errorDescription ?? "").font(.callout).foregroundStyle(.orange)
-                    }
-                }
+            if let error = model.recorderError {
+                Text(error.errorDescription ?? "").font(.callout).foregroundStyle(.orange)
             }
+            primary("Continue") { PermissionGuide.close(); go(.past) }
+                .disabled(!model.requiredPermissionsGranted)
+                .help(model.requiredPermissionsGranted ? "" : "Turn on background recording first")
             Spacer(minLength: 0)
         }
     }
@@ -207,12 +181,12 @@ struct WelcomeView: View {
             }
         case .needsFullDiskAccess:
             VStack(spacing: 14) {
-                Text("Dock Timelapse needs Full Disk Access to read your backups.\nTurn it on in System Settings; the import continues automatically.")
+                Text("Dock Timelapse needs Full Disk Access to read your backups.\nAllow it and the import continues by itself.")
                     .font(.callout)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.white.opacity(0.85))
                 HStack(spacing: 14) {
-                    primary("Open Privacy Settings", systemImage: "lock.shield") { Permissions.openFullDiskAccessSettings() }
+                    primary("Allow Access", systemImage: "lock.shield") { PermissionGuide.request(.fullDiskAccess, model: model) }
                     ProgressView().controlSize(.small).tint(.white)
                 }
                 secondary("Skip for now") { model.dismissImport(); go(.ready) }
@@ -239,7 +213,7 @@ struct WelcomeView: View {
                     .frame(maxWidth: 520)
                 HStack(spacing: 16) {
                     if let recovery = error.recovery, recovery == .openFullDiskAccessSettings {
-                        primary(recovery.title) { Permissions.openFullDiskAccessSettings() }
+                        primary(recovery.title) { PermissionGuide.request(.fullDiskAccess, model: model) }
                     } else {
                         primary("Try Again") { Task { await model.importFromTimeMachine() } }
                     }

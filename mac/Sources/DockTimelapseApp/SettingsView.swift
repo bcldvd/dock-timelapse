@@ -19,7 +19,7 @@ struct SettingsView: View {
                 }
                 if model.recorder == .needsApproval {
                     LabeledContent("Needs your OK") {
-                        Button("Open Login Items") { AppRecorder.openLoginItemsSettings() }
+                        Button("Allow…") { PermissionGuide.request(.backgroundRecording, model: model) }
                     }
                 }
                 LabeledContent("History") {

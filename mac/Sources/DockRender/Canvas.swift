@@ -38,6 +38,50 @@ struct Canvas {
 
     var bounds: CGRect { CGRect(x: 0, y: 0, width: width, height: height) }
 
+    /// Black at `alpha` (0–255) through `mask`, top-left at (x, y), composited straight into the pixels with
+    /// integer math, so it comes out the same however many renders run at once. Pixels inside `hole` (a rounded
+    /// rect about to be covered by opaque glass) are left alone, which also keeps it right under a fading
+    /// transparency layer: outside the glass, only the shadow would have shown through it.
+    func darken(_ mask: ShadowMask, x: Int, y: Int, alpha: Int, hole: CGRect, radius: Double) {
+        guard alpha > 0, let base = ctx.data?.assumingMemoryBound(to: UInt8.self) else { return }
+        let rowBytes = ctx.bytesPerRow
+        let (x0, x1) = (max(0, x), min(width, x + mask.width))
+        let (y0, y1) = (max(0, y), min(height, y + mask.height))
+        guard x0 < x1, y0 < y1 else { return }
+        let inner = hole.insetBy(dx: 1, dy: 1)  // the glass's antialiased edge still gets its shadow
+        let rr = max(0, min(radius - 1, inner.width / 2, inner.height / 2))
+        let (hx, hy) = (inner.width / 2 - rr, inner.height / 2 - rr)
+        let alpha = UInt32(alpha)
+        mask.bytes.withUnsafeBufferPointer { m in
+            for py in y0..<y1 {
+                // The pixels of this row the glass covers: [skipFrom, skipTo).
+                var (skipFrom, skipTo) = (x1, x1)
+                let dy = max(0, abs(Double(py) + 0.5 - inner.midY) - hy)
+                if !inner.isEmpty && dy <= rr {
+                    let half = hx + (rr * rr - dy * dy).squareRoot()
+                    skipFrom = max(x0, Int((inner.midX - half - 0.5).rounded(.up)))
+                    skipTo = min(x1, Int((inner.midX + half - 0.5).rounded(.down)) + 1)
+                }
+                let row = base + py * rowBytes
+                let mrow = (py - y) * mask.width - x
+                var px = x0
+                while px < x1 {
+                    if px == skipFrom && skipFrom < skipTo { px = skipTo; continue }
+                    let a = alpha * UInt32(m[mrow + px])  // 0…65025
+                    if a > 0 {
+                        let keep = 65025 - a
+                        let p = row + px * 4
+                        p[0] = UInt8((UInt32(p[0]) * keep + 32512) / 65025)
+                        p[1] = UInt8((UInt32(p[1]) * keep + 32512) / 65025)
+                        p[2] = UInt8((UInt32(p[2]) * keep + 32512) / 65025)
+                        p[3] = UInt8((UInt32(p[3]) * keep + 32512) / 65025)
+                    }
+                    px += 1
+                }
+            }
+        }
+    }
+
     func image(_ img: CGImage, in rect: CGRect, alpha: Double = 1) {
         ctx.saveGState()
         if alpha < 0.999 { ctx.setAlpha(alpha) }

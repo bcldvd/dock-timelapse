@@ -1,3 +1,4 @@
+import Accelerate
 import CoreGraphics
 import CoreImage
 import DockCore
@@ -104,31 +105,52 @@ final class Assets: @unchecked Sendable {
 
     // MARK: shadows
 
-    private var shadows: [String: CGImage] = [:]
+    private var shadows: [String: ShadowMask] = [:]
 
     /// A soft shadow for a w×h rounded rect: the shape blurred by `blur`, padded by 2×blur on each side.
-    /// Rendered at reduced resolution (a big blur has no fine detail) and cached per size.
-    func shadow(width w: Int, height h: Int, radius: Double, blur: Double) -> CGImage? {
+    /// Blurred at reduced resolution (a big blur has no fine detail), returned at full size, cached per size.
+    /// All on the CPU with Accelerate: Core Image blurs and Core Graphics mask drawing both gave slightly
+    /// different shadows when several renders ran at once.
+    func shadow(width w: Int, height h: Int, radius: Double, blur: Double) -> ShadowMask? {
         let key = "\(w)x\(h)r\(Int(radius))b\(Int(blur))"
         lock.lock(); defer { lock.unlock() }
-        if let img = shadows[key] { return img }
+        if let mask = shadows[key] { return mask }
         let scale = max(1, blur / 6)
         let pad = 2 * blur
         let W = Int(((Double(w) + 2 * pad) / scale).rounded(.up)), H = Int(((Double(h) + 2 * pad) / scale).rounded(.up))
-        let ctx = CGContext(data: nil, width: W, height: H, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceGray(),
-                            bitmapInfo: CGImageAlphaInfo.none.rawValue)!
+        guard let ctx = CGContext(data: nil, width: W, height: H, bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue),
+              let data = ctx.data else { return nil }
         ctx.setFillColor(gray: 1, alpha: 1)
         let rect = CGRect(x: pad / scale, y: pad / scale, width: Double(w) / scale, height: Double(h) / scale)
         ctx.addPath(roundedRect(rect, radius: radius / scale))
         ctx.fillPath()
-        guard let mask = ctx.makeImage() else { return nil }
-        let blurred = CIImage(cgImage: mask).clampedToExtent().applyingGaussianBlur(sigma: blur / scale)
-            .cropped(to: CGRect(x: 0, y: 0, width: W, height: H))
-        guard let img = ci.createCGImage(blurred, from: blurred.extent, format: .L8, colorSpace: CGColorSpaceCreateDeviceGray())
-        else { return nil }
-        if shadows.count > 256 { shadows.removeAll() }
-        shadows[key] = img
-        return img
+
+        // Three box blurs ≈ a Gaussian (Pillow blurs the same way).
+        let sigma = blur / scale
+        var box = Int((12 * sigma * sigma / 3 + 1).squareRoot().rounded())
+        if box % 2 == 0 { box += 1 }
+        var small = vImage_Buffer(data: data, height: vImagePixelCount(H), width: vImagePixelCount(W), rowBytes: ctx.bytesPerRow)
+        var tmp = [UInt8](repeating: 0, count: ctx.bytesPerRow * H)
+        let (outW, outH) = (w + Int(4 * blur), h + Int(4 * blur))
+        var out = [UInt8](repeating: 0, count: outW * outH)
+        let flags = vImage_Flags(kvImageEdgeExtend)
+        let ok = tmp.withUnsafeMutableBytes { t in
+            out.withUnsafeMutableBytes { o in
+                var other = vImage_Buffer(data: t.baseAddress, height: small.height, width: small.width, rowBytes: ctx.bytesPerRow)
+                var big = vImage_Buffer(data: o.baseAddress, height: vImagePixelCount(outH), width: vImagePixelCount(outW), rowBytes: outW)
+                let k = UInt32(box)
+                return vImageBoxConvolve_Planar8(&small, &other, nil, 0, 0, k, k, 0, flags) == kvImageNoError
+                    && vImageBoxConvolve_Planar8(&other, &small, nil, 0, 0, k, k, 0, flags) == kvImageNoError
+                    && vImageBoxConvolve_Planar8(&small, &other, nil, 0, 0, k, k, 0, flags) == kvImageNoError
+                    && vImageScale_Planar8(&other, &big, nil, vImage_Flags(kvImageHighQualityResampling)) == kvImageNoError
+            }
+        }
+        guard ok else { return nil }
+        let mask = ShadowMask(width: outW, height: outH, bytes: out)
+        if shadows.count > 16 { shadows.removeAll() }  // full size, and the Dock's size animates anyway
+        shadows[key] = mask
+        return mask
     }
 
     // MARK: icons
@@ -153,6 +175,13 @@ final class Assets: @unchecked Sendable {
         gray[rel] = img
         return img
     }
+}
+
+/// 8-bit coverage, row 0 at the top.
+struct ShadowMask: Sendable {
+    let width: Int
+    let height: Int
+    let bytes: [UInt8]
 }
 
 /// Crop to a square around the pixels with alpha > 8.

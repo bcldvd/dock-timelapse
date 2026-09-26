@@ -58,8 +58,9 @@ public final class Renderer: @unchecked Sendable {
     // MARK: glass
 
     /// Frosted glass: soft shadow, the blurred wallpaper seen through, a tint, and a hairline ring.
+    /// `layerAlpha`: the opacity of the transparency layer this is drawn in (the shadow bypasses it).
     func glass(_ c: Canvas, _ frosted: [(CGImage, Double)], _ box: CGRect, radius: Double, fill: RGBA, stroke: RGBA,
-               shadow: Bool = true) {
+               shadow: Bool = true, layerAlpha: Double = 1) {
         let r = CGRect(x: box.minX.rounded(), y: box.minY.rounded(), width: (box.maxX.rounded() - box.minX.rounded()),
                        height: (box.maxY.rounded() - box.minY.rounded()))
         guard r.width >= 2, r.height >= 2 else { return }
@@ -68,15 +69,8 @@ public final class Renderer: @unchecked Sendable {
             let blur = max(6, Double(Int(r.height) / 5))
             if let mask = assets.shadow(width: Int(r.width), height: Int(r.height), radius: radius, blur: blur) {
                 // Shadow = black through the blurred mask, offset down by blur/2 (as the Python renderer did).
-                let dest = CGRect(x: r.minX - 2 * blur, y: r.minY - 2 * blur + (blur / 2).rounded(.down),
-                                  width: r.width + 4 * blur, height: r.height + 4 * blur)
-                c.ctx.saveGState()
-                c.ctx.translateBy(x: dest.minX, y: dest.maxY)
-                c.ctx.scaleBy(x: 1, y: -1)
-                c.ctx.clip(to: CGRect(origin: .zero, size: dest.size), mask: mask)
-                c.ctx.setFillColor(RGBA(0, 0, 0, theme.shadow).cg)
-                c.ctx.fill(CGRect(origin: .zero, size: dest.size))
-                c.ctx.restoreGState()
+                c.darken(mask, x: Int(r.minX) - Int(2 * blur), y: Int(r.minY) - Int(2 * blur) + Int(blur / 2),
+                         alpha: Int((theme.shadow * min(1, layerAlpha)).rounded()), hole: r, radius: radius)
             }
         }
         c.withClip(path) {
@@ -167,7 +161,7 @@ public final class Renderer: @unchecked Sendable {
         let (x, y) = (Double(Int(x)), Double(Int(y)))
         c.layer(alpha: alpha) {
             glass(c, frosted, CGRect(x: x, y: y, width: w, height: h), radius: Double(Int(h) / 2), fill: theme.pill,
-                  stroke: theme.stroke)
+                  stroke: theme.stroke, layerAlpha: alpha)
             var cx = x + h * 0.42
             for p in parts {
                 switch p {

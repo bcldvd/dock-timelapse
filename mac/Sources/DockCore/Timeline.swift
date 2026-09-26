@@ -29,7 +29,7 @@ func grow(_ x: Double) -> (Double, Double) {
 
 // MARK: model
 
-public struct Scene: Sendable {
+public struct StoryScene: Sendable {
     public let date: Day
     public let day: Int
     public let apps: [DockApp]
@@ -50,7 +50,7 @@ public struct Tile: Sendable {
     public var center: Double { pos + slot / 2 }
 }
 
-public struct Label: Sendable {
+public struct ChangeLabel: Sendable {
     public let change: Change
     public let alpha: Double
     public let anchor: Double  // center position (slots) of the tile it refers to
@@ -69,7 +69,7 @@ public struct FrameState: Sendable {
     public let length: Double
     public let day: Double
     public let date: Day
-    public let labels: [Label]
+    public let labels: [ChangeLabel]
     public let progress: Double
     public let outro: Double
     public let title: Double
@@ -87,16 +87,16 @@ public struct Timing: Sendable {
     public init() {}
 }
 
-public func buildScenes(_ snapshots: [Snapshot]) -> [Scene] {
+public func buildScenes(_ snapshots: [Snapshot]) -> [StoryScene] {
     guard let first = snapshots.first?.day else { return [] }
     return snapshots.map {
-        Scene(date: $0.day, day: $0.day.days(since: first) + 1, apps: $0.apps, changes: $0.changes,
+        StoryScene(date: $0.day, day: $0.day.days(since: first) + 1, apps: $0.apps, changes: $0.changes,
               icons: $0.icons, wallpaper: $0.wallpaper)
     }
 }
 
 public struct Timeline: Sendable {
-    public let scenes: [Scene]
+    public let scenes: [StoryScene]
     public let timing: Timing
     public let sceneStarts: [Double]
     public let outroStart: Double
@@ -104,7 +104,7 @@ public struct Timeline: Sendable {
     public let spanDays: Int
     private let fallbackIcons: [String: String]
 
-    public init(_ scenes: [Scene], timing: Timing = Timing()) throws {
+    public init(_ scenes: [StoryScene], timing: Timing = Timing()) throws {
         guard !scenes.isEmpty else { throw DockError.noHistory }
         self.scenes = scenes
         self.timing = timing
@@ -124,14 +124,14 @@ public struct Timeline: Sendable {
         fallbackIcons = icons
     }
 
-    static func hold(_ i: Int, _ scenes: [Scene], _ timing: Timing) -> Double {
+    static func hold(_ i: Int, _ scenes: [StoryScene], _ timing: Timing) -> Double {
         let n = i == 0 ? 0 : scenes[i].changes.count
         return timing.holdBase + timing.holdPerChange * Double(n)
     }
 
     public func hold(_ i: Int) -> Double { Timeline.hold(i, scenes, timing) }
 
-    func icon(_ scene: Scene, _ app: DockApp) -> String? {
+    func icon(_ scene: StoryScene, _ app: DockApp) -> String? {
         scene.icons[app.key] ?? fallbackIcons[app.key]
     }
 
@@ -206,9 +206,9 @@ public struct Timeline: Sendable {
         }
     }
 
-    func labels(_ i: Int, _ phase: Phase, _ p: Double, _ tiles: [Tile]) -> [Label] {
+    func labels(_ i: Int, _ phase: Phase, _ p: Double, _ tiles: [Tile]) -> [ChangeLabel] {
         if i == 0 && phase != .transition { return [] }
-        var labels: [Label] = []
+        var labels: [ChangeLabel] = []
 
         func anchor(_ change: Change, _ sceneIndex: Int) -> Double {
             // Prefer the live tile of the (new) app; removed apps point to the gap they left.
@@ -230,7 +230,7 @@ public struct Timeline: Sendable {
             guard alpha > 0 else { return }
             let scene = scenes[k]
             for c in scene.changes {
-                labels.append(Label(change: c, alpha: alpha, anchor: anchor(c, k), icon: icon(scene, c.app),
+                labels.append(ChangeLabel(change: c, alpha: alpha, anchor: anchor(c, k), icon: icon(scene, c.app),
                                     oldIcon: c.old.flatMap { icon(scene, $0) }))
             }
         }
@@ -313,7 +313,7 @@ public struct Summary: Sendable {
     }
 }
 
-public func summarize(_ scenes: [Scene]) -> Summary {
+public func summarize(_ scenes: [StoryScene]) -> Summary {
     let first = scenes.first!.apps, last = scenes.last!.apps
     let fk = Set(first.map(\.key)), lk = Set(last.map(\.key))
     return Summary(

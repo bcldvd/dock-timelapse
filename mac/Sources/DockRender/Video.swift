@@ -98,24 +98,33 @@ public func renderVideo(dataRoot: URL, format: VideoFormat, to out: URL, fps: In
         }
     } catch {
         writer.cancelWriting()
-        try? fm.removeItem(at: partial)
-        if error is CancellationError { throw error }
+        removeLeftovers(of: partial)
         throw error
     }
     if cancelled {
         writer.cancelWriting()
-        try? fm.removeItem(at: partial)
+        removeLeftovers(of: partial)
         throw CancellationError()
     }
     input.markAsFinished()
     await writer.finishWriting()
     guard writer.status == .completed else {
-        try? fm.removeItem(at: partial)
+        removeLeftovers(of: partial)
         throw DockError.renderFailed(writer.error?.localizedDescription ?? "the video couldn't be finished")
     }
     try? fm.removeItem(at: out)
     try fm.moveItem(at: partial, to: out)
+    removeLeftovers(of: partial)
     return out
+}
+
+/// AVFoundation writes through a hidden "<file>.sb-…" temporary that it sometimes leaves behind.
+func removeLeftovers(of partial: URL) {
+    let dir = partial.deletingLastPathComponent()
+    let prefix = partial.lastPathComponent
+    for name in (try? FileManager.default.contentsOfDirectory(atPath: dir.path)) ?? [] where name.hasPrefix(prefix) {
+        try? FileManager.default.removeItem(at: dir.appending(path: name))
+    }
 }
 
 /// One frame as a PNG.

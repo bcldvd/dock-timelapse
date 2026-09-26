@@ -102,6 +102,35 @@ final class Assets: @unchecked Sendable {
         return (ci.createCGImage(base, from: frame)!, ci.createCGImage(frosted, from: frame)!)
     }
 
+    // MARK: shadows
+
+    private var shadows: [String: CGImage] = [:]
+
+    /// A soft shadow for a w×h rounded rect: the shape blurred by `blur`, padded by 2×blur on each side.
+    /// Rendered at reduced resolution (a big blur has no fine detail) and cached per size.
+    func shadow(width w: Int, height h: Int, radius: Double, blur: Double) -> CGImage? {
+        let key = "\(w)x\(h)r\(Int(radius))b\(Int(blur))"
+        lock.lock(); defer { lock.unlock() }
+        if let img = shadows[key] { return img }
+        let scale = max(1, blur / 6)
+        let pad = 2 * blur
+        let W = Int(((Double(w) + 2 * pad) / scale).rounded(.up)), H = Int(((Double(h) + 2 * pad) / scale).rounded(.up))
+        let ctx = CGContext(data: nil, width: W, height: H, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceGray(),
+                            bitmapInfo: CGImageAlphaInfo.none.rawValue)!
+        ctx.setFillColor(gray: 1, alpha: 1)
+        let rect = CGRect(x: pad / scale, y: pad / scale, width: Double(w) / scale, height: Double(h) / scale)
+        ctx.addPath(roundedRect(rect, radius: radius / scale))
+        ctx.fillPath()
+        guard let mask = ctx.makeImage() else { return nil }
+        let blurred = CIImage(cgImage: mask).clampedToExtent().applyingGaussianBlur(sigma: blur / scale)
+            .cropped(to: CGRect(x: 0, y: 0, width: W, height: H))
+        guard let img = ci.createCGImage(blurred, from: blurred.extent, format: .L8, colorSpace: CGColorSpaceCreateDeviceGray())
+        else { return nil }
+        if shadows.count > 256 { shadows.removeAll() }
+        shadows[key] = img
+        return img
+    }
+
     // MARK: icons
 
     /// The icon cropped to its visible tile (macOS icons carry ~10% transparent margin), or nil.

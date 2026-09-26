@@ -66,11 +66,18 @@ public final class Renderer: @unchecked Sendable {
         let path = roundedRect(r, radius: radius)
         if shadow && theme.shadow > 0 {
             let blur = max(6, Double(Int(r.height) / 5))
-            c.ctx.saveGState()
-            c.ctx.setShadow(offset: CGSize(width: 0, height: -(blur / 2).rounded(.down)), blur: blur * 2,
-                            color: RGBA(0, 0, 0, theme.shadow).cg)
-            c.fill(path, RGBA(0, 0, 0))
-            c.ctx.restoreGState()
+            if let mask = assets.shadow(width: Int(r.width), height: Int(r.height), radius: radius, blur: blur) {
+                // Shadow = black through the blurred mask, offset down by blur/2 (as the Python renderer did).
+                let dest = CGRect(x: r.minX - 2 * blur, y: r.minY - 2 * blur + (blur / 2).rounded(.down),
+                                  width: r.width + 4 * blur, height: r.height + 4 * blur)
+                c.ctx.saveGState()
+                c.ctx.translateBy(x: dest.minX, y: dest.maxY)
+                c.ctx.scaleBy(x: 1, y: -1)
+                c.ctx.clip(to: CGRect(origin: .zero, size: dest.size), mask: mask)
+                c.ctx.setFillColor(RGBA(0, 0, 0, theme.shadow).cg)
+                c.ctx.fill(CGRect(origin: .zero, size: dest.size))
+                c.ctx.restoreGState()
+            }
         }
         c.withClip(path) {
             for (img, a) in frosted { c.image(img, in: c.bounds, alpha: a) }
@@ -125,7 +132,7 @@ public final class Renderer: @unchecked Sendable {
         case text(String, RGBA, Int)
     }
 
-    func parts(_ l: Label) -> [Part] {
+    func parts(_ l: ChangeLabel) -> [Part] {
         let ch = l.change
         switch ch.kind {
         case .replaced:

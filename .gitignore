@@ -11,3 +11,4 @@ mac/.build/
 mac/.swiftpm/
 /dist/
 /build/
+mac/build/

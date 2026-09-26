@@ -19,9 +19,11 @@ let package = Package(
             "DockCore", "DockMac", "DockRender",
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
         ]),
-        .executableTarget(name: "DockTimelapseApp", dependencies: ["DockCore", "DockMac", "DockRender"]),
+        .target(name: "DockAppModel", dependencies: ["DockCore", "DockMac", "DockRender"]),
+        .executableTarget(name: "DockTimelapseApp", dependencies: ["DockAppModel", "DockCore", "DockMac", "DockRender"]),
         .testTarget(name: "DockCoreTests", dependencies: ["DockCore"]),
         .testTarget(name: "DockMacTests", dependencies: ["DockMac"]),
         .testTarget(name: "DockRenderTests", dependencies: ["DockRender"]),
+        .testTarget(name: "DockAppModelTests", dependencies: ["DockAppModel"]),
     ]
 )

@@ -76,6 +76,10 @@ public struct ImportResult: Equatable, Sendable {
     public let added: Int
     public let first: String?
     public let last: String?
+
+    public init(backups: Int, read: Int, added: Int, first: String?, last: String?) {
+        (self.backups, self.read, self.added, self.first, self.last) = (backups, read, added, first, last)
+    }
 }
 
 /// Read the Dock from each backup and fold one snapshot per day of change into the store.
